@@ -174,7 +174,7 @@ async function startBurn(event) {
 		return;
 	}
 
-	if (typeof amount !== "number" || isNaN(amount) || amount <= 0) {
+	if (amount.isNaN(amount) || amount.isLessThanOrEqualTo(0)) {
 		isLoading = false;
 		message = "Invalid quantity";
 		return;
@@ -240,7 +240,7 @@ async function startBurn(event) {
 		<br />
 
 		<button type="submit" class="btn btn-outline-primary btn-block">
-			Begin Burn
+			{`Send To Ethereum`}
 		</button>
 	</form>
 </div>
