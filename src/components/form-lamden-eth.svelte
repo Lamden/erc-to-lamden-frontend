@@ -25,7 +25,7 @@
         .pop();
       try {
         const res = await fetch(
-          `${projectConf.lamden.network.apiLink}/contracts/${projectConf.lamden.token.contractName}/balances?key=${$vk}`,
+          `${projectConf.lamden.network.apiLink}/states/${projectConf.lamden.token.contractName}/balances/${$vk}`,
           {
             method: "GET",
           }
@@ -39,7 +39,7 @@
           }
         }
       } catch (error) {
-        console.log(error);
+        balance = `0.0 ${tokenName}`;
       }
     }
   }
