@@ -561,7 +561,7 @@ export const projectConf = {
     serverLink: 'http://localhost:3001',
     lamden: {
         network: {
-            apiLink: "https://testnet.lamden.io/api/",
+            apiLink: "https://testnet.lamden.io/api",
         },
         clearingHouse: {
             appName: "Clearing House Token", // Your DAPPS's name
