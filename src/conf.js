@@ -258,7 +258,7 @@ export const projectConf = {
         },
         tokens: [{
             name: 'WETH',
-            address: '0x1eA4B5bF4180712357c29B7C3F550F8699ea1f89',
+            address: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
             decimals: 18,
             abi: [
                 {
@@ -565,13 +565,13 @@ export const projectConf = {
         },
         clearingHouse: {
             appName: "Clearing House Token", // Your DAPPS's name
-            version: "0.0.3", // any version to start, increment later versions to update connection info
+            version: "0.0.4", // any version to start, increment later versions to update connection info
             logo: "/lamden.jpg", // or whatever the location of your logo
-            contractName: "con_clearing_house_v005", // Will never change
+            contractName: "con_eth_bridge_v1", // Will never change
             networkType: "testnet", // other option is 'mainnet'
         },
         token: {
-            contractName: "con_token_v005"
+            contractName: "con_weth_lst001_v1"
         }
     }
 }

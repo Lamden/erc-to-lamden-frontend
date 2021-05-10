@@ -1,8 +1,8 @@
 {
 	"background_color": "#ffffff",
 	"theme_color": "#333333",
-	"name": "TODO",
-	"short_name": "TODO",
+	"name": "Lamden Link",
+	"short_name": "lamden_link",
 	"display": "minimal-ui",
 	"start_url": "/",
 	"icons": [
