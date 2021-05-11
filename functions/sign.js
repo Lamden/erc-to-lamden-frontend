@@ -28,7 +28,7 @@ exports.handler = async function(event) {
 	if (event.httpMethod === "GET") return {statusCode: 500}
 	
 	console.log(event)
-	let unSignedABI = event.body;
+	let unSignedABI = event.body.unSignedABI;
 	unSignedABI = unSignedABI.substring(1, unSignedABI.length - 1);
 	const signedABIObj = sign(unSignedABI);
 
