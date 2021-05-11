@@ -91,6 +91,7 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 		stampLimit: projectConf.lamden.stamps.burn.approval,
 	};
 	walletController.sendTransaction(txInfo, async (txResults) => {
+		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
 			message = "Transaction canceled by user."
 			resolve(false)
@@ -125,6 +126,7 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 	};
 
 	walletController.sendTransaction(txInfo, async (txResults) => {
+		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
 			message = "Transaction canceled by user."
 		}else{
