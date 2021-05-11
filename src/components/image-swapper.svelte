@@ -21,13 +21,14 @@
     <img src={eth} class="token-img img-thumbnail" alt="" />
     <p class="img-thumbnail text-center">Ethereum</p>
   </div>
-  <div class="col" id="arrow" on:click={changePosition}>
+  <div class="switch col" id="arrow" on:click={changePosition}>
     <img
       src={swapIcon}
       id=""
       class={ethToLamden ? "" : "reverse-arrow"}
       alt=""
     />
+    <strong>Switch</strong>
   </div>
   <div class="col">
     <img src={lamden} class="token-img img-thumbnail" alt="" />
@@ -38,5 +39,15 @@
 <style>
   .reverse-arrow {
     transform: rotate(180deg);
+  }
+  .switch{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .switch > strong {
+    text-decoration: underline;
+    color: var(--primary-color);
   }
 </style>

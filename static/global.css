@@ -4,6 +4,8 @@ body {
   font-family: "Roboto", sans-serif;
   font-weight: 400;
   background-color: #f9f9f9;
+
+  --primary-color: #461BC2;
 }
 h1.heading {
   color: #310a31;

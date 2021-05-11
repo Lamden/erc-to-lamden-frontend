@@ -47,6 +47,8 @@ async function checkBalance(event) {
 		} catch (error) {
 			balance = new BN(0);
 		}
+	}else{
+		tokenName = ""
 	}
 }
 
@@ -220,21 +222,22 @@ async function startBurn(event) {
 					<option value={token.name}>{token.name}</option>
 				{/each}
 			</select>
-			{#if balance}
+			{#if tokenName}
 				<p>Your balance is: {`${balance.toFixed(18)} ${tokenName}`}</p>
 			{/if}
 		</div>
 
 		<div class="form-group">
 			<label for="quantity">Amount</label>
-			<input
-				type="number"
-				step="0.000000000000000001"
+			<input 
 				class="form-control"
+				type="text"
+				placeholder=""
 				name="quantity"
 				id="quantity"
-				placeholder=""
-				min="0"/>
+				required pattern="\d+"
+				on:invalid={(e) => e.target.setCustomValidity('A number is required')}
+				on:input={(e) => e.target.setCustomValidity('')}>
 		</div>
 
 		<br />

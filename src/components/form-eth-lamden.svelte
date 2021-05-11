@@ -228,15 +228,15 @@
     </div>
     <div class="form-group">
       <label for="quantity">Amount</label>
-      <input
-        type="number"
-        step="0.000000000000000001"
-        class="form-control"
-        name="quantity"
-        id="quantity"
-        placeholder=""
-        min="0"
-      />
+			  <input 
+			  	class="form-control"
+          type="text"
+          placeholder=""
+          name="quantity"
+          id="quantity"
+          required pattern="\d+"
+          on:invalid={(e) => e.target.setCustomValidity('A number is required')}
+          on:input={(e) => e.target.setCustomValidity('')}>
     </div>
     <button type="submit" class="btn btn-outline-primary btn-block"
       >Begin Swap</button
