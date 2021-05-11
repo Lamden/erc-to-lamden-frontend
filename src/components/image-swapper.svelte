@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte'
 	import { ethToLamdenStore } from "../stores/ethToLamden";
 	import { projectConf } from "../conf.js";
-	import { vk, tauBalance, ethBalance, selectedAccount } from "../stores/lamden.ts"
+	import { web3, selectedAccount } from "svelte-web3";
+	import { vk, tauBalance, ethBalance } from "../stores/lamden.ts"
 	import BN from 'bignumber.js'
 
 
@@ -65,7 +66,7 @@
 	async function checkETHBalance(){
 		console.log({$selectedAccount})
 		if (!$selectedAccount) return
-		web3.eth.getBalance($selectedAccount).then(res => console.log(res))
+		$web3.eth.getBalance($selectedAccount).then(res => console.log(res))
 	}
 </script>
 
