@@ -6,6 +6,7 @@ import { web3, selectedAccount } from "svelte-web3";
 import { projectConf } from "../conf.js";
 import axios from "axios";
 import BN from 'bignumber.js'
+import { getErrorInfo } from "../utils.js"
 
 let isLoading = false;
 let tokenName = ""
@@ -104,15 +105,7 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 				resolve(false)
 			}
 		} else {
-			if (txResults){
-				if (txResults.data){
-					if (txResults.data.resultInfo){
-						if (txResults.data.resultInfo.errorInfo){
-							message = txResults.data.resultInfo.errorInfo[0]
-						}
-					}
-				}
-			}
+			message = getErrorInfo(txResults)
 			resolve(false)
 		}
 	});	
