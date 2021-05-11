@@ -88,7 +88,7 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 			amount: { "__fixed__": amountToApprove.toFixed(18) },
 			to: projectConf.lamden.clearingHouse.contractName
 		},
-		stampLimit: 65,
+		stampLimit: projectConf.lamden.stamps.burn.approval,
 	};
 	walletController.sendTransaction(txInfo, async (txResults) => {
 		if (txResults.status === "Transaction Cancelled") {
@@ -117,12 +117,11 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 		networkType: projectConf.lamden.clearingHouse.networkType,
 		methodName: "burn",
 		kwargs: {
-		ethereum_contract,
-		ethereum_address: $selectedAccount,
-		lamden_address: $vk,
-		amount: { "__fixed__": amount.toFixed(18) },
+			ethereum_contract,
+			ethereum_address: $selectedAccount,
+			amount: { "__fixed__": amount.toFixed(18) },
 		},
-		stampLimit: 65,
+		stampLimit: projectConf.lamden.stamps.burn,
 	};
 
 	walletController.sendTransaction(txInfo, async (txResults) => {
