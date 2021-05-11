@@ -2,7 +2,6 @@
 "use strict";
 require('dotenv').config();
 const Web3 = require("web3");
-
 const NODE_ENV = process.env.NODE_ENV || "dev"
 
 if (NODE_ENV == "dev"){
@@ -22,11 +21,14 @@ function sign(data) {
 }
 
 exports.handler = async function(event) {
-  let unSignedABI = event.body.unSignedABI;
+  console.log(event)
+  console.log(event.body)
+  let unSignedABI = event.body;
+  console.log({unSignedABI})
   unSignedABI = unSignedABI.substring(1, unSignedABI.length - 1);
   const signedABIObj = sign(unSignedABI);
   return {
     statusCode: 200,
-    body: JSON.stringify({signedABIObj})
+    body: signedABIObj
   };
 }
