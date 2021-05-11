@@ -99,7 +99,8 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 				resolve(false)
 			}
 		} else {
-			message = txResults.data.resultInfo.errorInfo[0];
+			console.log(txResults)
+			//message = txResults.data.resultInfo.errorInfo[0];
 			resolve(false)
 		}
 	});	
@@ -107,6 +108,7 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 
 const sendBurn = (token, amount) => new Promise(resolve => {
 	const ethereum_contract = token.address;
+	console.log(vk)
 
 	const txInfo = {
 		networkType: projectConf.lamden.clearingHouse.networkType,
@@ -153,7 +155,8 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 				message = 'Transaction failed';
 			}
 		} else {
-			message = txResults.data.resultInfo.errorInfo[0];
+			console.log(txResults)
+			//message = txResults.data.resultInfo.errorInfo[0];
 		}
 		status = ""
 		isLoading = false;
