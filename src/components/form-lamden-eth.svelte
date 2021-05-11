@@ -191,7 +191,6 @@ async function startBurn(event) {
 	const tokenName = formData.get("tokenName").toString();
 
 	let amount = new BN(formData.get("quantity"));
-	await sendApproval(amount)
 
 	const token = projectConf.ethereum.tokens
 		.filter((t) => t.name === tokenName)
