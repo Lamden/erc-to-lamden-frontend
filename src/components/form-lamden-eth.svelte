@@ -168,7 +168,7 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 					status = ""
 
 					resolve(true)
-					
+
 				} catch (error) {
 					message = 'Transaction failed';
 				}
@@ -203,7 +203,7 @@ async function startBurn(event) {
 		return;
 	}
 
-	if (amount.isNaN(amount) || amount.isLessThanOrEqualTo(0)) {
+	if (amount.isNaN() || amount.isLessThanOrEqualTo(0)) {
 		isLoading = false;
 		message = "Invalid quantity";
 		return;

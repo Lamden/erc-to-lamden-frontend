@@ -3,6 +3,7 @@
 	import { projectConf } from "../conf.js";
 	import { web3, selectedAccount } from "svelte-web3";
 	import { vk } from "../stores/lamden";
+	import BN from 'bignumber.js'
 
 	let tokenName = ""
 	let isLoading = false;
@@ -11,15 +12,10 @@
 	$: success = "";
 	$: status = ""
 
-	let balance = "";
+	let balance = new BN(0);
 
 	function isString(s) {
 		return typeof s === "string" || s instanceof String;
-	}
-
-	function toFloatingPoint(value: string, decimals: number) {
-		console.log(value);
-		return ((value as any) / 10 ** decimals).toFixed(decimals).toString();
 	}
 
 	async function checkTokenBalance(event) {
@@ -112,7 +108,7 @@
 		const formData = new FormData(event.target);
 		const tokenName = formData.get("tokenName").toString();
 		const recipient = $vk;
-		let quantity = Number.parseFloat(formData.get("quantity").toString());
+		let quantity = new BN(formData.get("quantity"));
 
 		const token = projectConf.ethereum.tokens
 		.filter((t) => t.name === tokenName)
@@ -133,14 +129,14 @@
 			message = "Recipient's Lamden key is not correct.";
 			return;
 		}
-		if (typeof quantity !== "number" || isNaN(quantity) || quantity <= 0) {
+		if (quantity.isNaN() || quantity.isLessThanOrEqualTo(0)) {
 			isLoading = false;
 			message = "Invalid quantity";
 			return;
 		}
 
 		quantity = toBaseUnit(
-			quantity.toString(10),
+			quantity.toString(),
 			token.decimals,
 			$web3.utils.BN
 		).toString();
@@ -152,17 +148,17 @@
 		);
 
 		try {
-			const balance = await erc20TokenContract.methods
+			let currentBalance = await erc20TokenContract.methods
 				.balanceOf($selectedAccount)
 				.call();
-			if (Number.parseInt(balance) < Number.parseInt(quantity as any)) {
-				message = `You do not have enough balance in your metamask wallet. You currently own ${toFloatingPoint(
-				"" + balance,
-				token.decimals
-				)} ${tokenName} but you are trying to swap ${toFloatingPoint(
-				quantity.toString(10),
-				token.decimals
-				)} ${tokenName} tokens.`;
+
+			currentBalance = new BN(currentBalance)
+
+			if (currentBalance.isLessThan(quantity)) {
+				message = 
+					`You do not have enough balance in your metamask wallet. 
+					You currently own ${balance.toFixed(token.decimals)} ${tokenName} but you are trying to swap 
+					${new BN(Web3.utils.fromWei(quantity.toString(), 'ether')).toFixed(token.decimals)} ${tokenName} tokens.`;
 				isLoading = false;
 				return;
 			}
@@ -176,13 +172,13 @@
 		try {
 			status = "Sending Etherum token approval..."
 			const approval = await erc20TokenContract.methods
-				.approve(projectConf.ethereum.clearingHouse.address, quantity)
+				.approve(projectConf.ethereum.clearingHouse.address, quantity.toString())
 				.send({ from: $selectedAccount });
 
 			if (approval.status === true) {
 				status = `Sending ${token.name} tokens from Ethereum to Lamden...`
 				const swaped = await clearingHouseContract.methods
-				.deposit(token.address, quantity, recipient)
+				.deposit(token.address, quantity.toString(), recipient)
 				.send({ from: $selectedAccount });
 
 				if (swaped.status) {
