@@ -20,14 +20,14 @@ const eth = new Web3Eth(NETWORK);
 function sign(data) {
   // @ts-ignore
   data = Web3Utils.soliditySha3('0x' + data);
+  console.log({PRIVATE_KEY})
   return eth.accounts.sign(data, PRIVATE_KEY)
 }
 
 exports.handler = async function(event) {
+  if (event.httpMethod === "GET") return {statusCode: 500}
   console.log(event)
-  console.log(event.body)
   let unSignedABI = event.body;
-  console.log({unSignedABI})
   unSignedABI = unSignedABI.substring(1, unSignedABI.length - 1);
   const signedABIObj = sign(unSignedABI);
   return {
