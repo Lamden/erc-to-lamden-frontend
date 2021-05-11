@@ -93,9 +93,8 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 			amount: { "__fixed__": amountToApprove.toFixed(18) },
 			to: projectConf.lamden.clearingHouse.contractName
 		},
-		stampLimit: projectConf.lamden.stamps.burn.approval,
+		stampLimit: projectConf.lamden.stamps.approval,
 	};
-	console.log({txInfo})
 	walletController.sendTransaction(txInfo, async (txResults) => {
 		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
@@ -192,6 +191,7 @@ async function startBurn(event) {
 	const tokenName = formData.get("tokenName").toString();
 
 	let amount = new BN(formData.get("quantity"));
+	await sendApproval(amount)
 
 	const token = projectConf.ethereum.tokens
 		.filter((t) => t.name === tokenName)
