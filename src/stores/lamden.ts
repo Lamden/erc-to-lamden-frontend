@@ -3,6 +3,7 @@ import BN from 'bignumber.js'
 
 export const lamdenWalletInfo = writable(undefined);
 export const tauBalance = writable(new BN(0));
+export const ethBalance = writable(new BN(0));
 export const vk = derived(lamdenWalletInfo, ($lamdenWalletInfo) => {
   if (
     $lamdenWalletInfo &&

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte'
 	import { ethToLamdenStore } from "../stores/ethToLamden";
 	import { projectConf } from "../conf.js";
-	import { vk, tauBalance } from "../stores/lamden.ts"
+	import { vk, tauBalance, ethBalance, selectedAccount } from "../stores/lamden.ts"
 	import BN from 'bignumber.js'
 
 
@@ -20,10 +20,10 @@
 	});
 
 	onMount(() => {
-		checkLamdenBalance()
-		timer = setInterval(checkLamdenBalance, 5000)
+		checkAccoutBalances()
+		timer = setInterval(checkAccoutBalances, 10000)
 		return () => {
-			clearInterval(checkLamdenBalance)
+			clearInterval(checkAccoutBalances)
 			timer = null
 		}
 	})
@@ -32,9 +32,15 @@
 		ethToLamdenStore.update(e2l => !e2l);
 	}
 
-	async function checkLamdenBalance() {
-		if (typeof window === 'undefined' || !$vk) return
+	async function checkAccoutBalances(){
+		if (typeof window === 'undefined') return
 		if (document.hidden) return
+		checkLamdenBalance()
+		checkETHBalance()
+	}
+
+	async function checkLamdenBalance() {
+		if (!$vk) return
 		try {
 			const res = await fetch(
 				`${projectConf.lamden.network.apiLink}/states/currency/balances/${$vk}`,
@@ -54,6 +60,12 @@
 		} catch (error) {
 			tauBalance.set(new BN(0));
 		}
+	}
+
+	async function checkETHBalance(){
+		console.log({$selectedAccount})
+		if (!$selectedAccount) return
+		web3.eth.getBalance($selectedAccount).then(res => console.log(res))
 	}
 </script>
 
