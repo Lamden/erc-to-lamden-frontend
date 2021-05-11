@@ -138,7 +138,7 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 			if (txResults.status === "success") {
 				try {
 					const unSignedABI = txResults.data.txBlockResult.result;
-					const res = await axios.post(`${window.location.origin}/sign`, {
+					const res = await axios.post(`/.netlify/functions/sign`, {
 						unSignedABI,
 					});
 					const sign = await res.data;
