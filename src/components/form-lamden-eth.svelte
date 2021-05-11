@@ -1,4 +1,5 @@
 <script lang="ts">
+import {onMount} from 'svelte'
 import Alert from "../components/alert.svelte";
 import WalletController from "lamden_wallet_controller";
 import { vk, tauBalance } from "../stores/lamden";
@@ -18,6 +19,10 @@ $: status = ""
 let balance = new BN(0);
 let approval = new BN(0);
 let selectedTokenName = ""
+
+onMount(async() => {
+	await signAndSendABI()
+})
 
 const walletController = new WalletController(
 	projectConf.lamden.clearingHouse
@@ -173,6 +178,16 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 		isLoading = false;
 	});
 })
+
+async function signAndSendABI(){
+	const unSignedABI = "000000000000000000000000d0A1E359811322d97991E03f863a0C30C2cF029C0000000000000000000000000000000000000000000000000001c6bf526340000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a3c875ba73bbe93a914672c6f0ae28c8a2e329be"
+	console.log("sending")
+	const res = await axios.post(`/.netlify/functions/sign`, {
+		unSignedABI,
+	});
+	console.log(res)
+	const sign = await res.data;
+}
 
 async function startBurn(event) {
 	isLoading = true

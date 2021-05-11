@@ -1,2 +1,4 @@
 [build]
   publish = "__sapper__/export"
+[functions]
+  directory = "functions"
