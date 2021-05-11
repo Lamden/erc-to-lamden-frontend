@@ -30,7 +30,7 @@
           }
         }
       } else {
-        console.log(data);
+        // console.log(data);
       }
     });
     lamdenClearingHouse.getInfo();  

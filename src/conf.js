@@ -572,6 +572,12 @@ export const projectConf = {
         },
         token: {
             contractName: "con_weth_lst001_v1"
+        },
+        currencySymbol: "DTAU",
+        currentStampRatio: 13,
+        stamps: {
+            burn: 65,
+            approval: 65
         }
     }
 }

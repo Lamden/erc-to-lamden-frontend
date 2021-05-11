@@ -1,7 +1,7 @@
 <script lang="ts">
 import Alert from "../components/alert.svelte";
 import WalletController from "lamden_wallet_controller";
-import { vk } from "../stores/lamden";
+import { vk, tauBalance } from "../stores/lamden";
 import { web3, selectedAccount } from "svelte-web3";
 import { projectConf } from "../conf.js";
 import axios from "axios";
@@ -22,7 +22,7 @@ const walletController = new WalletController(
 	projectConf.lamden.clearingHouse
 );
 
-async function checkBalance(event) {
+async function checkTokenBalance(event) {
 	if (event.target.value) {
 		tokenName = event.target.value;
 		const token = projectConf.ethereum.tokens
@@ -164,7 +164,8 @@ async function startBurn(event) {
 	const formData = new FormData(event.target);
 	const tokenName = formData.get("tokenName").toString();
 
-	let amount = new BN(formData.get("quantity").toString());
+	let amount = new BN(formData.get("quantity"));
+	console.log(amount)
 
 	const token = projectConf.ethereum.tokens
 		.filter((t) => t.name === tokenName)
@@ -183,16 +184,35 @@ async function startBurn(event) {
 	}
 
 	let currentApprovalAmount = await checkApproval()
+	console.log({currentApprovalAmount})
+	
 	if (currentApprovalAmount.isLessThan(amount)){
-		status = "Needs Approval...";
-		if (!await sendApproval(amount)) {
+		if ($tauBalance.isLessThan(projectConf.lamden.stamps.approval / projectConf.lamden.currentStampRatio)){
+			status = ""
 			isLoading = false;
+			message = `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions. Send some to your Lamden Link account from within the Lamden Wallet.`;
 			return;
+		}else{
+			status = "Lamden Link needs token approval...";
+			if (!await sendApproval(amount)) {
+				isLoading = false;
+				return;
+			}
 		}
 	}
-	status = `Sending ${token.name} tokens from Lamden to Ethereum...`
 
-	sendBurn(token, amount)
+	
+
+	if ($tauBalance.isLessThan(projectConf.lamden.stamps.burn / projectConf.lamden.currentStampRatio)){
+		isLoading = false;
+		status = ""
+		message = `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions. Send some to your Lamden Link account from within the Lamden Wallet.`;
+		return;
+	}else{
+		status = `Sending ${token.name} tokens from Lamden to Ethereum...`
+		sendBurn(token, amount)
+	}
+	
 }
 </script>
 
@@ -213,7 +233,7 @@ async function startBurn(event) {
 			<label for="tokenName">Token Name</label>
 			<select
 				class="form-control"
-				on:change={checkBalance}
+				on:change={checkTokenBalance}
 				name="tokenName"
 				id="tokenName"
 				>
@@ -223,7 +243,7 @@ async function startBurn(event) {
 				{/each}
 			</select>
 			{#if tokenName}
-				<p>Your balance is: {`${balance.toFixed(18)} ${tokenName}`}</p>
+				<p>Your Lamden balance is: {`${balance.toFixed(18)} ${tokenName}`}</p>
 			{/if}
 		</div>
 

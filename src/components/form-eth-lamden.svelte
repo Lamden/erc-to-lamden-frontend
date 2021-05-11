@@ -223,7 +223,7 @@
         {/each}
       </select>
       {#if balance}
-        <p>Your balance is: {balance}</p>
+        <p>Your Ethereum balance is: {balance}</p>
       {/if}
     </div>
     <div class="form-group">
