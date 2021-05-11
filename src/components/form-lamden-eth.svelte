@@ -95,6 +95,7 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 		},
 		stampLimit: projectConf.lamden.stamps.burn.approval,
 	};
+	console.log({txInfo})
 	walletController.sendTransaction(txInfo, async (txResults) => {
 		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
@@ -191,7 +192,6 @@ async function startBurn(event) {
 	const tokenName = formData.get("tokenName").toString();
 
 	let amount = new BN(formData.get("quantity"));
-	console.log(amount)
 
 	const token = projectConf.ethereum.tokens
 		.filter((t) => t.name === tokenName)
@@ -220,7 +220,6 @@ async function startBurn(event) {
 						Send ${projectConf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
 			return;
 		}else{
-			status = "Lamden Link needs token approval...";
 			if (!await sendApproval(amount)) {
 				isLoading = false;
 				return;
