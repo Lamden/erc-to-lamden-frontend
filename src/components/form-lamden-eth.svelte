@@ -180,6 +180,9 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 })
 
 async function signAndSendABI(){
+	const token = projectConf.ethereum.tokens
+	.filter((t) => t.name === "WETH")
+	.pop();
 	const unSignedABI = "000000000000000000000000d0A1E359811322d97991E03f863a0C30C2cF029C0000000000000000000000000000000000000000000000000001c6bf526340000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a3c875ba73bbe93a914672c6f0ae28c8a2e329be"
 	console.log("sending")
 	const res = await axios.post(`/.netlify/functions/sign`, {
