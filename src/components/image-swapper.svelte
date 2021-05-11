@@ -84,7 +84,6 @@
 	.switch{
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
 		align-items: center;
 	}
 	.switch > strong {

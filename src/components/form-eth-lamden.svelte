@@ -246,8 +246,9 @@
           on:invalid={handleInvalid}
           on:input={handleInput}>
     </div>
+    <br />
     <button type="submit" class="btn btn-outline-primary btn-block"
-      >Begin Swap</button
+      >{`Send To Lamden`}</button
     >
   </form>
 </div>

@@ -60,7 +60,7 @@ async function checkApproval() {
 			{
 				method: "GET",
 			}
-		);
+		).catch((e) => console.log("ERROR"));
 		if (res.status === 200) {
 			const value = (await res.json()).value;
 			if (value) {
@@ -69,6 +69,8 @@ async function checkApproval() {
 			} else {
 				return new BN(0);
 			}
+		}else{
+			return new BN(0);
 		}
 	} catch (error) {
 		return new BN(0);
@@ -190,7 +192,8 @@ async function startBurn(event) {
 		if ($tauBalance.isLessThan(projectConf.lamden.stamps.approval / projectConf.lamden.currentStampRatio)){
 			status = ""
 			isLoading = false;
-			message = `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions. Send some to your Lamden Link account from within the Lamden Wallet.`;
+			message =  `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions.
+						Send ${projectConf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
 			return;
 		}else{
 			status = "Lamden Link needs token approval...";
@@ -201,12 +204,11 @@ async function startBurn(event) {
 		}
 	}
 
-	
-
 	if ($tauBalance.isLessThan(projectConf.lamden.stamps.burn / projectConf.lamden.currentStampRatio)){
 		isLoading = false;
 		status = ""
-		message = `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions. Send some to your Lamden Link account from within the Lamden Wallet.`;
+		message =   `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions.
+					Send ${projectConf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
 		return;
 	}else{
 		status = `Sending ${token.name} tokens from Lamden to Ethereum...`
