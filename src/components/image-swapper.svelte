@@ -78,6 +78,7 @@
 	<div class="col">
 		<img src={eth} class="token-img img-thumbnail" alt="" />
 		<p class="img-thumbnail text-center">Ethereum</p>
+		<p class="img-thumbnail text-center">{`${$ethBalance.toFixed(8)} ETH`}</p>
 	</div>
 	<div class="switch col" id="arrow" on:click={changePosition}>
 		<img
