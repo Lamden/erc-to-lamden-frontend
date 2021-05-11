@@ -138,8 +138,8 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 			if (txResults.status === "success") {
 				try {
 					const unSignedABI = txResults.data.txBlockResult.result
-					const res = await axios.post(`/.netlify/functions/sign`, {
-						unSignedABI,
+					const res = await axios.post(`/.netlify/functions/sign`, unSignedABI, {
+						headers: { 'Content-Type': 'text/plain' }
 					});
 					const sign = await res.data;
 					const nonce = "0x" + unSignedABI.substring(129, 193);
