@@ -21,7 +21,7 @@ let approval = new BN(0);
 let selectedTokenName = ""
 
 onMount(() => {
-	setTimeout(signAndSendABI, 10000)
+	//setTimeout(signAndSendABI, 10000)
 })
 
 const walletController = new WalletController(
@@ -162,10 +162,13 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 					const withdrawRes = await clearingHouseContract.methods
 						.withdraw(obj.token, obj.amount, obj.nonce, obj.v, obj.r, obj.s)
 						.send({ from: $selectedAccount });
+
 					success = 'WETH tokens sent to Ethereum Chain';
 					isLoading = false;
 					status = ""
+
 					resolve(true)
+					
 				} catch (error) {
 					message = 'Transaction failed';
 				}
@@ -178,43 +181,6 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 		isLoading = false;
 	});
 })
-
-async function signAndSendABI(){
-	const token = projectConf.ethereum.tokens
-	.filter((t) => t.name === "WETH")
-	.pop();
-	const unSignedABI = "000000000000000000000000d0A1E359811322d97991E03f863a0C30C2cF029C0000000000000000000000000000000000000000000000000001c6bf526340000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a3c875ba73bbe93a914672c6f0ae28c8a2e329be"
-	console.log("sending")
-	const res = await axios.post(`/.netlify/functions/sign`, {
-		unSignedABI,
-	});
-	console.log(res)
-	const sign = await res.data;
-	console.log(sign)
-						
-	const nonce = "0x" + unSignedABI.substring(129, 193);
-	const { v, r, s } = sign;
-
-	const amountHex = "0x" + unSignedABI.substring(65, 129);
-	const clearingHouseContract = new $web3.eth.Contract(
-		projectConf.ethereum.clearingHouse.abi,
-		projectConf.ethereum.clearingHouse.address
-	);
-	const obj = {
-		unSignedABI,
-		token: token.address,
-		amount: amountHex,
-		nonce: nonce,
-		v,
-		r,
-		s,
-	};
-	const withdrawRes = await clearingHouseContract.methods
-		.withdraw(obj.token, obj.amount, obj.nonce, obj.v, obj.r, obj.s)
-		.send({ from: $selectedAccount });
-	
-	console.log(withdrawRes)
-}
 
 async function startBurn(event) {
 	isLoading = true
