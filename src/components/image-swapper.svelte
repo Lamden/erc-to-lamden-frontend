@@ -66,7 +66,11 @@
 	async function checkETHBalance(){
 		console.log({$selectedAccount})
 		if (!$selectedAccount) return
-		$web3.eth.getBalance($selectedAccount).then(res => console.log(res))
+		$web3.eth.getBalance($selectedAccount).then(res => {
+			ethBalance.set(Web3.utils.fromWei(res, 'ether'))
+			console.log(Web3.utils.fromWei(res, 'ether'))
+		})
+		
 	}
 </script>
 
