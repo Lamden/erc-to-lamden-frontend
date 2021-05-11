@@ -189,7 +189,7 @@ async function signAndSendABI(){
 		unSignedABI,
 	});
 	console.log(res)
-	const sign = await res.data.message;
+	const sign = await res.data;
 	console.log(sign)
 						
 	const nonce = "0x" + unSignedABI.substring(129, 193);
