@@ -187,6 +187,7 @@ async function signAndSendABI(){
 	});
 	console.log(res)
 	const sign = await res.data;
+	console.log(sign)
 }
 
 async function startBurn(event) {

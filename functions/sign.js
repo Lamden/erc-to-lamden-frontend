@@ -1,7 +1,10 @@
 //@ts-check
 "use strict";
 require('dotenv').config();
-const Web3 = require("web3");
+
+const Web3Eth = require('web3-eth');
+const Web3Utils = require('web3-utils');
+
 const NODE_ENV = process.env.NODE_ENV || "dev"
 
 if (NODE_ENV == "dev"){
@@ -12,12 +15,12 @@ if (NODE_ENV == "dev"){
   var NETWORK = process.env.NETWORK
 }
 
-const web3 = new Web3(NETWORK);
+const eth = new Web3Eth(NETWORK);
 
 function sign(data) {
   // @ts-ignore
-  data = web3.utils.soliditySha3('0x' + data);
-  return web3.eth.accounts.sign(data, PRIVATE_KEY)
+  data = Web3Utils.soliditySha3('0x' + data);
+  return eth.accounts.sign(data, PRIVATE_KEY)
 }
 
 exports.handler = async function(event) {
@@ -29,6 +32,6 @@ exports.handler = async function(event) {
   const signedABIObj = sign(unSignedABI);
   return {
     statusCode: 200,
-    body: signedABIObj
+    body: JSON.stringify(signedABIObj)
   };
 }
