@@ -3,7 +3,7 @@
 
   /* Images */
   import eth from "../../static/ethereum.jpg";
-  import lamden from "../../static/lamden.jpg";
+  import lamden from "../../static/lamden.png";
   import swapIcon from "../../static/swap.png";
 
   export let ethToLamden: boolean;

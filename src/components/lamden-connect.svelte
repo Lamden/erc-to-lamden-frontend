@@ -1,5 +1,5 @@
 <script lang="ts">
-    import lamden from "../../static/lamden.jpg";
+    import lamden from "../../static/lamden.png";
     import WalletController from "lamden_wallet_controller";
     import { projectConf } from "../conf";
     import { lamdenWalletInfo } from "../stores/lamden";

@@ -12,13 +12,13 @@
 </script>
 
 <svelte:head>
-  <title>Token Bridge</title>
+  <title>Lamden Link - Token Bridge</title>
 </svelte:head>
 
 {#if $connected}
   <div class="container">
     <div class="col-md-8 offset-md-2">
-      <h1 class="heading text-center">Token Bridge</h1>
+      <h1 class="heading text-center">Lamden Link</h1>
       <ImageSwapper />
       <LamdenConnect />
       {#if $ethToLamdenStore}

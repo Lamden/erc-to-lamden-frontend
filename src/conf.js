@@ -566,7 +566,7 @@ export const projectConf = {
         clearingHouse: {
             appName: "Clearing House Token", // Your DAPPS's name
             version: "0.0.4", // any version to start, increment later versions to update connection info
-            logo: "/lamden.jpg", // or whatever the location of your logo
+            logo: "/lamden.png", // or whatever the location of your logo
             contractName: "con_eth_bridge_v1", // Will never change
             networkType: "testnet", // other option is 'mainnet'
         },
