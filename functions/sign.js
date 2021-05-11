@@ -32,6 +32,8 @@ exports.handler = async function(event) {
 	unSignedABI = unSignedABI.substring(1, unSignedABI.length - 1);
 	const signedABIObj = sign(unSignedABI);
 
+	console.log({unSignedABI, signedABIObj})
+
 	return {
 		statusCode: 200,
 		body: JSON.stringify(signedABIObj)

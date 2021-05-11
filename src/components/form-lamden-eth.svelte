@@ -137,7 +137,7 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 		}else{
 			if (txResults.status === "success") {
 				try {
-					const unSignedABI = txResults.data.txBlockResult.result;
+					const unSignedABI = txResults.data.txBlockResult.result
 					const res = await axios.post(`/.netlify/functions/sign`, {
 						unSignedABI,
 					});
@@ -233,7 +233,7 @@ async function startBurn(event) {
 					Send ${projectConf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
 		return;
 	}else{
-		status = `Sending ${token.name} tokens from Lamden to Ethereum...`
+		status = `Sending ${token.name} tokens from Lamden to Ethereum (check for popup)...`
 		sendBurn(token, amount)
 	}
 	
