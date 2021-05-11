@@ -7,7 +7,10 @@
 
 	$: message = "";
 	$: success = "";
+	$: status = ""
+
 	let balance = "";
+
 	function isString(s) {
 		return typeof s === "string" || s instanceof String;
 	}
@@ -17,7 +20,7 @@
 		return ((value as any) / 10 ** decimals).toFixed(decimals).toString();
 	}
 
-	async function checkBalance(event) {
+	async function checkTokenBalance(event) {
 		const tokenName = event.target.value;
 		if (tokenName) {
 		const token = projectConf.ethereum.tokens
@@ -100,8 +103,10 @@
 	}
 
 	async function startSwap(event) {
-		isLoading = true;
-		message = "";
+		isLoading = true
+		message = ""
+		status = ""
+
 		const formData = new FormData(event.target);
 		const tokenName = formData.get("tokenName").toString();
 		const recipient = $vk;
@@ -137,6 +142,7 @@
 			token.decimals,
 			$web3.utils.BN
 		).toString();
+
 		const erc20TokenContract = new $web3.eth.Contract(token.abi, token.address);
 		const clearingHouseContract = new $web3.eth.Contract(
 			projectConf.ethereum.clearingHouse.abi,
@@ -166,10 +172,13 @@
 		}
 
 		try {
+			status = "Sending Etherum token approval..."
 			const approval = await erc20TokenContract.methods
 				.approve(projectConf.ethereum.clearingHouse.address, quantity)
 				.send({ from: $selectedAccount });
+
 			if (approval.status === true) {
+				status = `Sending ${token.name} tokens from Ethereum to Lamden...`
 				const swaped = await clearingHouseContract.methods
 				.deposit(token.address, quantity, recipient)
 				.send({ from: $selectedAccount });
@@ -206,8 +215,10 @@
 
 <div class="loading {isLoading ? 'is-loading' : ''}">
 	<h1>Loading</h1>
-	</div>
-	<div class="row" style="margin-top: 3rem">
+	<p class="status">{status}</p>
+</div>
+
+<div class="row" style="margin-top: 3rem">
 	<Alert {message} type={"danger"} />
 	<Alert message={success} type={"success"} />
 	<form
@@ -220,7 +231,7 @@
 		<label for="tokenName">Token Name</label>
 		<select
 			class="form-control"
-			on:change={checkBalance}
+			on:change={checkTokenBalance}
 			name="tokenName"
 			id="tokenName"
 		>
@@ -235,14 +246,14 @@
 		</div>
 		<div class="form-group">
 		<label for="quantity">Amount</label>
-				<input 
-					class="form-control"
+		<input 
+			class="form-control"
 			type="text"
 			placeholder=""
 			name="quantity"
 			id="quantity"
 			required 
-					pattern="^\d*\.?\d*$"
+			pattern="^\d*\.?\d*$"
 			on:invalid={handleInvalid}
 			on:input={handleInput}>
 		</div>
@@ -265,5 +276,8 @@
 	}
 	.is-loading {
 		display: block;
+	}
+	.status{
+		margin: 0
 	}
 </style>
