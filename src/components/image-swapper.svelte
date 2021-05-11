@@ -3,6 +3,7 @@
 	import { ethToLamdenStore } from "../stores/ethToLamden";
 	import { projectConf } from "../conf.js";
 	import { vk, tauBalance } from "../stores/lamden.ts"
+	import BN from 'bignumber.js'
 
 
 	/* Images */
