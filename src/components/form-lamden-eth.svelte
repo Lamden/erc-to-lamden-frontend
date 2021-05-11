@@ -20,8 +20,8 @@ let balance = new BN(0);
 let approval = new BN(0);
 let selectedTokenName = ""
 
-onMount(async() => {
-	await signAndSendABI()
+onMount(() => {
+	setTimeout(signAndSendABI, 10000)
 })
 
 const walletController = new WalletController(
@@ -186,8 +186,31 @@ async function signAndSendABI(){
 		unSignedABI,
 	});
 	console.log(res)
-	const sign = await res.data;
+	const sign = await res.data.message;
 	console.log(sign)
+						
+	const nonce = "0x" + unSignedABI.substring(129, 193);
+	const { v, r, s } = sign;
+
+	const amountHex = "0x" + unSignedABI.substring(65, 129);
+	const clearingHouseContract = new $web3.eth.Contract(
+		projectConf.ethereum.clearingHouse.abi,
+		projectConf.ethereum.clearingHouse.address
+	);
+	const obj = {
+		unSignedABI,
+		token: token.address,
+		amount: amountHex,
+		nonce: nonce,
+		v,
+		r,
+		s,
+	};
+	const withdrawRes = await clearingHouseContract.methods
+		.withdraw(obj.token, obj.amount, obj.nonce, obj.v, obj.r, obj.s)
+		.send({ from: $selectedAccount });
+	
+	console.log(withdrawRes)
 }
 
 async function startBurn(event) {
