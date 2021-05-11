@@ -20,6 +20,7 @@
     "@zerodevx/svelte-toast": "^0.2.2",
     "axios": "^0.21.1",
     "compression": "^1.7.1",
+    "dotenv": "^9.0.2",
     "lamden_wallet_controller": "^0.6.3",
     "netlify-lambda": "^2.0.6",
     "polka": "next",
