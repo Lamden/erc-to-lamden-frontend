@@ -21,7 +21,7 @@
 
 	onMount(() => {
 		checkLamdenBalance()
-		timer = setInterval(checkLamdenBalance, 15000)
+		timer = setInterval(checkLamdenBalance, 5000)
 		return () => {
 			clearInterval(checkLamdenBalance)
 			timer = null
@@ -33,7 +33,7 @@
 	}
 
 	async function checkLamdenBalance() {
-		if (typeof window === 'undefined' || !vk) return
+		if (typeof window === 'undefined' || !$vk) return
 		if (document.hidden) return
 		try {
 			const res = await fetch(

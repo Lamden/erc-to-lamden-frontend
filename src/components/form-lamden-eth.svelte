@@ -90,6 +90,11 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 		stampLimit: 65,
 	};
 	walletController.sendTransaction(txInfo, async (txResults) => {
+		if (txResults.status === "Transaction Cancelled") {
+			message = "Transaction canceled by user."
+			resolve(false)
+		}
+
 		if (txResults.status === "success") {
 			try {
 				status = "Lamden approval sent...";
@@ -99,8 +104,15 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 				resolve(false)
 			}
 		} else {
-			console.log(txResults)
-			//message = txResults.data.resultInfo.errorInfo[0];
+			if (txResults){
+				if (txResults.data){
+					if (txResults.data.resultInfo){
+						if (txResults.data.resultInfo.errorInfo){
+							message = txResults.data.resultInfo.errorInfo[0]
+						}
+					}
+				}
+			}
 			resolve(false)
 		}
 	});	
@@ -108,65 +120,71 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 
 const sendBurn = (token, amount) => new Promise(resolve => {
 	const ethereum_contract = token.address;
-	console.log(vk)
-
 	const txInfo = {
 		networkType: projectConf.lamden.clearingHouse.networkType,
 		methodName: "burn",
 		kwargs: {
 		ethereum_contract,
 		ethereum_address: $selectedAccount,
-		lamden_address: vk,
+		lamden_address: $vk,
 		amount: { "__fixed__": amount.toFixed(18) },
 		},
 		stampLimit: 65,
 	};
 
 	walletController.sendTransaction(txInfo, async (txResults) => {
-		if (txResults.status === "success") {
-			try {
-				const unSignedABI = txResults.data.txBlockResult.result;
-				const res = await axios.post(`${window.location.origin}/sign`, {
-					unSignedABI,
-				});
-				const sign = await res.data;
-				const nonce = "0x" + unSignedABI.substring(129, 193);
-				const { v, r, s } = sign;
+		if (txResults.status === "Transaction Cancelled") {
+			message = "Transaction canceled by user."
+		}else{
+			if (txResults.status === "success") {
+				try {
+					const unSignedABI = txResults.data.txBlockResult.result;
+					const res = await axios.post(`${window.location.origin}/sign`, {
+						unSignedABI,
+					});
+					const sign = await res.data;
+					const nonce = "0x" + unSignedABI.substring(129, 193);
+					const { v, r, s } = sign;
 
-				const amountHex = "0x" + unSignedABI.substring(65, 129);
-				const clearingHouseContract = new $web3.eth.Contract(
-					projectConf.ethereum.clearingHouse.abi,
-					projectConf.ethereum.clearingHouse.address
-				);
-				const obj = {
-					unSignedABI,
-					token: token.address,
-					amount: amountHex,
-					nonce: nonce,
-					v,
-					r,
-					s,
-				};
-				const withdrawRes = await clearingHouseContract.methods
-					.withdraw(obj.token, obj.amount, obj.nonce, obj.v, obj.r, obj.s)
-					.send({ from: $selectedAccount });
-				success = 'WETH tokens sent to Ethereum Chain';
-			} catch (error) {
-				message = 'Transaction failed';
+					const amountHex = "0x" + unSignedABI.substring(65, 129);
+					const clearingHouseContract = new $web3.eth.Contract(
+						projectConf.ethereum.clearingHouse.abi,
+						projectConf.ethereum.clearingHouse.address
+					);
+					const obj = {
+						unSignedABI,
+						token: token.address,
+						amount: amountHex,
+						nonce: nonce,
+						v,
+						r,
+						s,
+					};
+					const withdrawRes = await clearingHouseContract.methods
+						.withdraw(obj.token, obj.amount, obj.nonce, obj.v, obj.r, obj.s)
+						.send({ from: $selectedAccount });
+					success = 'WETH tokens sent to Ethereum Chain';
+					isLoading = false;
+					status = ""
+					resolve(true)
+				} catch (error) {
+					message = 'Transaction failed';
+				}
+			} else {
+				message = getErrorInfo(txResults)
 			}
-		} else {
-			console.log(txResults)
-			//message = txResults.data.resultInfo.errorInfo[0];
 		}
 		status = ""
+		resolve(false)
 		isLoading = false;
 	});
 })
 
 async function startBurn(event) {
-	isLoading = true;
-	message = "";
-	status = "";
+	isLoading = true
+	message = ""
+	status = ""
+	success = ""
 	const formData = new FormData(event.target);
 	const tokenName = formData.get("tokenName").toString();
 
