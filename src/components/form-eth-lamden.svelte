@@ -3,6 +3,8 @@
 	import { projectConf } from "../conf.js";
 	import { web3, selectedAccount } from "svelte-web3";
 	import { vk } from "../stores/lamden";
+
+	let tokenName = ""
 	let isLoading = false;
 
 	$: message = "";
@@ -21,28 +23,28 @@
 	}
 
 	async function checkTokenBalance(event) {
-		const tokenName = event.target.value;
-		if (tokenName) {
-		const token = projectConf.ethereum.tokens
-			.filter((t) => t.name === tokenName)
-			.pop();
-		try {
-			const erc20TokenContract = new $web3.eth.Contract(
-				token.abi,
-				token.address
-			);
-			const val = await erc20TokenContract.methods
-				.balanceOf($selectedAccount)
-				.call();
-			console.log(val);
-			if (val) {
-				balance = toFloatingPoint(val.toString(), token.decimals) + ` ${tokenName}`;
-			} else {
-				balance = `0.0 ${tokenName}`;
+		if (event.target.value) {
+			tokenName = event.target.value;
+			const token = projectConf.ethereum.tokens
+				.filter((t) => t.name === tokenName)
+				.pop();
+			try {
+				const erc20TokenContract = new $web3.eth.Contract(
+					token.abi,
+					token.address
+				);
+				const val = await erc20TokenContract.methods
+					.balanceOf($selectedAccount)
+					.call();
+				console.log(val);
+				if (val) {
+					balance = new BN(Web3.utils.fromWei(val, 'ether'))
+				} else {
+					balance = new BN(0)
+				}
+			} catch (error) {
+				console.log(error);
 			}
-		} catch (error) {
-			console.log(error);
-		}
 		}
 	}
 
@@ -237,11 +239,11 @@
 		>
 			<option value="">Select Token</option>
 			{#each projectConf.ethereum.tokens as token}
-			<option value={token.name}>{token.name}</option>
+				<option value={token.name}>{token.name}</option>
 			{/each}
 		</select>
-		{#if balance}
-			<p>Your Ethereum balance is: {balance}</p>
+		{#if tokenName}
+			<p>Your Ethereum balance is: {`${balance.toFixed(18)} ${tokenName}`}</p>
 		{/if}
 		</div>
 		<div class="form-group">
