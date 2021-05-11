@@ -33,7 +33,7 @@
 	}
 
 	async function checkLamdenBalance() {
-		if (typeof window === 'undefined') return
+		if (typeof window === 'undefined' || !vk) return
 		if (document.hidden) return
 		try {
 			const res = await fetch(

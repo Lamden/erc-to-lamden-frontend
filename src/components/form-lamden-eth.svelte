@@ -114,6 +114,7 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 		kwargs: {
 		ethereum_contract,
 		ethereum_address: $selectedAccount,
+		lamden_address: vk,
 		amount: { "__fixed__": amount.toFixed(18) },
 		},
 		stampLimit: 65,
