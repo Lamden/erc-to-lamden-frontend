@@ -21,8 +21,8 @@
 	});
 
 	onMount(() => {
-		checkAccoutBalances()
-		timer = setInterval(checkAccoutBalances, 10000)
+		setTimeout(checkAccoutBalances, 5000)
+		timer = setInterval(checkAccoutBalances, 30000)
 		return () => {
 			clearInterval(checkAccoutBalances)
 			timer = null
