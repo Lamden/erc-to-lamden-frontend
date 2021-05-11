@@ -34,23 +34,24 @@
 <title>Lamden Link - Token Bridge</title>
 </svelte:head>
 
-{#if $connected}
-	<div class="container">
-		<div class="col-md-8 offset-md-2">
+
+<div class="container">
+	<div class="col-md-8 offset-md-2">
 		<div class="heading">
 			<img src="/logo-512.png" alt="lamden-link-logo" />
 			<h1 class="heading text-center">Lamden Link</h1>
 		</div>
-
-		<ImageSwapper />
-		<LamdenConnect />
-		{#if $ethToLamdenStore}
-			<FormEthLamden />
+		{#if $connected}
+			<ImageSwapper />
+			<LamdenConnect />
+			{#if $ethToLamdenStore}
+				<FormEthLamden />
+			{:else}
+				<FormLamdenEth />
+			{/if}
 		{:else}
-			<FormLamdenEth />
+			<WalletConnect />
 		{/if}
-		</div>
 	</div>
-{:else}
-	<WalletConnect />
-{/if}
+</div>
+

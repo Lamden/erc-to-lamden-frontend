@@ -185,7 +185,7 @@ async function startBurn(event) {
 
 	let currentApprovalAmount = await checkApproval()
 	console.log({currentApprovalAmount})
-	
+
 	if (currentApprovalAmount.isLessThan(amount)){
 		if ($tauBalance.isLessThan(projectConf.lamden.stamps.approval / projectConf.lamden.currentStampRatio)){
 			status = ""
@@ -214,6 +214,12 @@ async function startBurn(event) {
 	}
 	
 }
+
+const handleInput = (e) => {
+	e.target.setCustomValidity('')
+	e.target.value = e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+}
+const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
 </script>
 
 <div class="loading {isLoading ? 'is-loading' : ''}">
@@ -255,9 +261,10 @@ async function startBurn(event) {
 				placeholder=""
 				name="quantity"
 				id="quantity"
-				required pattern="\d+"
-				on:invalid={(e) => e.target.setCustomValidity('A number is required')}
-				on:input={(e) => e.target.setCustomValidity('')}>
+				required 
+				pattern="^\d*\.?\d*$"
+				on:invalid={handleInvalid}
+				on:input={handleInput}>
 		</div>
 
 		<br />

@@ -195,6 +195,13 @@
       return;
     }
   }
+
+  const handleInput = (e) => {
+    e.target.setCustomValidity('')
+    e.target.value = e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+  }
+  const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
+
 </script>
 
 <div class="loading {isLoading ? 'is-loading' : ''}">
@@ -234,9 +241,10 @@
           placeholder=""
           name="quantity"
           id="quantity"
-          required pattern="\d+"
-          on:invalid={(e) => e.target.setCustomValidity('A number is required')}
-          on:input={(e) => e.target.setCustomValidity('')}>
+          required 
+				  pattern="^\d*\.?\d*$"
+          on:invalid={handleInvalid}
+          on:input={handleInput}>
     </div>
     <button type="submit" class="btn btn-outline-primary btn-block"
       >Begin Swap</button
