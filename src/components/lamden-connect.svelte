@@ -7,16 +7,16 @@
   
     const clearingHouseConnectionRequest = projectConf.lamden.clearingHouse;
   
-    const lamdenClearingHouse = new WalletController(
+    const walletController = new WalletController(
       clearingHouseConnectionRequest
     );
-    lamdenClearingHouse.walletIsInstalled().then((installed) => {
+    walletController.walletIsInstalled().then((installed) => {
       if (!installed) {
         walletErrorMessage = "Lamden wallet extension not found";
       }
     });
   
-    lamdenClearingHouse.events.on("newInfo", (data) => {
+    walletController.events.on("newInfo", (data) => {
       console.log(data)
       $lamdenWalletInfo = data;
       const { errors } = data;
@@ -26,6 +26,8 @@
             walletErrorMessage = "Please authorize the dApp";
           } else if (error.includes("is Locked")) {
             walletErrorMessage = "Please unlock your lamden wallet";
+          } else if (error.includes("User rejected")) {
+            walletErrorMessage = "Connection Rejected. Refresh page to try again.";
           } else {
             console.log(error);
           }
@@ -34,7 +36,7 @@
         // console.log(data);
       }
     });
-    lamdenClearingHouse.getInfo();  
+    walletController.getInfo();  
   </script>
 
   <div class="{ walletErrorMessage ? "wallet-error" : "hidden"}">

@@ -2,6 +2,7 @@
 	import ImageSwapper from "../components/image-swapper.svelte";
 	import WalletConnect from "../components/wallet-connect.svelte";
 	import { web3, selectedAccount, connected } from "svelte-web3";
+	import { vk } from "../stores/lamden.ts";
 	import FormEthLamden from "../components/form-eth-lamden.svelte";
 	import { ethToLamdenStore } from "../stores/ethToLamden";
 	import FormLamdenEth from "../components/form-lamden-eth.svelte";
@@ -46,12 +47,15 @@
 			<h1 class="heading text-center">Lamden Link <strong>TESTNET</strong></h1>
 		</div>
 		{#if $connected}
-			<ImageSwapper />
-			<LamdenConnect />
-			{#if $ethToLamdenStore}
-				<FormEthLamden />
+			{#if $vk}
+				<ImageSwapper />
+				{#if $ethToLamdenStore}
+					<FormEthLamden />
+				{:else}
+					<FormLamdenEth />
+				{/if}
 			{:else}
-				<FormLamdenEth />
+				<LamdenConnect />
 			{/if}
 		{:else}
 			<WalletConnect />

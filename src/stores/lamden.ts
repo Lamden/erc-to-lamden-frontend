@@ -10,7 +10,7 @@ export const vk = derived(lamdenWalletInfo, ($lamdenWalletInfo) => {
     $lamdenWalletInfo.wallets &&
     $lamdenWalletInfo.wallets.length > 0
   ) {
-    console.log($lamdenWalletInfo)
+
     return $lamdenWalletInfo.wallets[0];
   } else {
     return undefined;

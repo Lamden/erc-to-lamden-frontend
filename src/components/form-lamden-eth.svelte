@@ -3,7 +3,7 @@ import {onMount} from 'svelte'
 import Alert from "../components/alert.svelte";
 import WalletController from "lamden_wallet_controller";
 import { vk, tauBalance, ethBalance } from "../stores/lamden";
-import { web3, selectedAccount } from "svelte-web3";
+import { web3, selectedAccount, chainData } from "svelte-web3";
 import { projectConf } from "../conf.js";
 import axios from "axios";
 import BN from 'bignumber.js'
@@ -15,14 +15,28 @@ let tokenName = ""
 $: message = ""
 $: success = ""
 $: status = ""
+$: buttonDisabled = $ethBalance.isLessThanOrEqualTo(0) || $tauBalance.isLessThanOrEqualTo(0) || $chainData.chainId !== projectConf.ethereum.chainId
 
 let balance = new BN(0);
 let approval = new BN(0);
 let selectedTokenName = ""
 
+chainData.subscribe(current => checkChain(current))
+
 onMount(() => {
-	//setTimeout(signAndSendABI, 10000)
+	checkChain($chainData)
 })
+
+function checkChain (current){
+	console.log(current)
+	if (current.chainId !== projectConf.ethereum.chainId){
+		message = "Switch Metamask to the Kovan Test Network."
+		return
+	}
+	if (current.chainId === projectConf.ethereum.chainId && message === "Switch Metamask to the Kovan Test Network."){
+		message = ""
+	}	
+}
 
 const walletController = new WalletController(
 	projectConf.lamden.clearingHouse
@@ -295,7 +309,7 @@ const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
 
 		<button 
 			type="submit" 
-			disabled={$ethBalance.isLessThanOrEqualTo(0) || $tauBalance.isLessThanOrEqualTo(0)} 
+			disabled={buttonDisabled} 
 			class="btn btn-outline-primary btn-block">
 			Send Tokens To Ethereum
 		</button>

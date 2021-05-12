@@ -1,7 +1,8 @@
 <script lang="ts">
+	import {onMount} from 'svelte'	
 	import Alert from "../components/alert.svelte";
 	import { projectConf } from "../conf.js";
-	import { web3, selectedAccount } from "svelte-web3";
+	import { web3, selectedAccount, chainData } from "svelte-web3";
 	import { vk, ethBalance } from "../stores/lamden";
 	import BN from 'bignumber.js'
 
@@ -11,8 +12,26 @@
 	$: message = "";
 	$: success = "";
 	$: status = ""
+	$: buttonDisabled = $chainData.chainId !== projectConf.ethereum.chainId || $ethBalance.isLessThanOrEqualTo(0)
 
 	let balance = new BN(0);
+
+	chainData.subscribe(current => checkChain(current))
+
+	onMount(() => {
+		checkChain($chainData)
+	})
+
+	function checkChain (current){
+		console.log(current)
+		if (current.chainId !== projectConf.ethereum.chainId){
+			message = "Switch Metamask to the Kovan Test Network."
+			return
+		}
+		if (current.chainId === projectConf.ethereum.chainId && message === "Switch Metamask to the Kovan Test Network."){
+			message = ""
+		}	
+	}
 
 	function isString(s) {
 		return typeof s === "string" || s instanceof String;
@@ -256,7 +275,7 @@
 			on:input={handleInput}>
 		</div>
 		<br />
-		<button type="submit" disabled={$ethBalance.isLessThanOrEqualTo(0)} class="btn btn-outline-primary btn-block">
+		<button type="submit" disabled={buttonDisabled} class="btn btn-outline-primary btn-block">
 			Send Tokens To Lamden
 		</button>
 	</form>
