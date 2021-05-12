@@ -8,8 +8,8 @@
 	<meta name="twitter:card" content="summary" />
 	<meta name="twitter:title" content="{projectConf.site.title}" />
 	<meta name="twitter:description" content="{projectConf.site.description}" />
-	<meta name="twitter:site" content="@RSwapOfficial" />
-	<meta name="twitter:creator" content="Lamden Community" />
+	<meta name="twitter:site" content="@LamdenTau" />
+	<meta name="twitter:creator" content="Lamden.io" />
 	<meta name="twitter:image" content="{projectConf.site.siteLogo}" />
 	<meta name="twitter:image:alt" content="{projectConf.site.siteLogo}" />
 
