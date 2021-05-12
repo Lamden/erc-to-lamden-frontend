@@ -200,7 +200,7 @@
 
 				if (swaped.status) {
 					isLoading = false;
-					success = "Swaping was successful";
+					success = "Swapping was successful";
 					return;
 				} else {
 					throw new Error("Clearing house status is not true.");
