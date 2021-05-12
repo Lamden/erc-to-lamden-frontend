@@ -222,7 +222,6 @@ async function startBurn(event) {
 	}
 
 	let currentApprovalAmount = await checkApproval()
-	console.log({currentApprovalAmount})
 
 	if (currentApprovalAmount.isLessThan(amount)){
 		if ($tauBalance.isLessThan(projectConf.lamden.stamps.approval / projectConf.lamden.currentStampRatio)){

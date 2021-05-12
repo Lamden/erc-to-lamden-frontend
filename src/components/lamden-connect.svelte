@@ -17,7 +17,6 @@
     });
   
     walletController.events.on("newInfo", (data) => {
-      console.log(data)
       $lamdenWalletInfo = data;
       const { errors } = data;
       if (errors && errors.length > 0) {

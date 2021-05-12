@@ -50,7 +50,6 @@
 				const val = await erc20TokenContract.methods
 					.balanceOf($selectedAccount)
 					.call();
-				console.log(val);
 				if (val) {
 					balance = new BN(Web3.utils.fromWei(val, 'ether'))
 				} else {
