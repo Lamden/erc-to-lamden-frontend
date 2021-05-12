@@ -1,4 +1,13 @@
+const DOMAIN_NAME = "https://www.lamdenlink.com"
+
 export const projectConf = {
+    site: {
+        hostname: DOMAIN_NAME,
+        title: "Lamden Link - Token Bridge",
+        description: "A cross-chain token bridge from Lamden to Ethereum.",
+        siteLogo: `${DOMAIN_NAME}/logo-192.png`,
+        imageBig: `${DOMAIN_NAME}/logo-512.png`
+    },
     ethereum: {
         network: "wss://kovan.infura.io/ws/v3/63ded85a9a5442c6ae2b94c2e97fb8c4",
         chainId: 42,

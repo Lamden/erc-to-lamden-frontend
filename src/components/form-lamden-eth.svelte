@@ -54,6 +54,7 @@ async function checkTokenBalance(event) {
 					method: "GET",
 				}
 			);
+			console.log(res)
 			if (res.status === 200) {
 				const value = (await res.json()).value;
 				if (value) {
