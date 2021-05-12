@@ -2,7 +2,7 @@
 import {onMount} from 'svelte'
 import Alert from "../components/alert.svelte";
 import WalletController from "lamden_wallet_controller";
-import { vk, tauBalance } from "../stores/lamden";
+import { vk, tauBalance, ethBalance } from "../stores/lamden";
 import { web3, selectedAccount } from "svelte-web3";
 import { projectConf } from "../conf.js";
 import axios from "axios";
@@ -293,8 +293,11 @@ const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
 
 		<br />
 
-		<button type="submit" class="btn btn-outline-primary btn-block">
-			{`Send To Ethereum`}
+		<button 
+			type="submit" 
+			disabled={$ethBalance.isLessThanOrEqualTo(0) || $tauBalance.isLessThanOrEqualTo(0)} 
+			class="btn btn-outline-primary btn-block">
+			Send Tokens To Ethereum
 		</button>
 	</form>
 </div>

@@ -1,6 +1,7 @@
 export const projectConf = {
     ethereum: {
         network: "wss://kovan.infura.io/ws/v3/63ded85a9a5442c6ae2b94c2e97fb8c4",
+
         clearingHouse: {
             address: '0x1b8AFdf00eac15B45bA38FB1c5e92037442Ed3bA',
             abi: [

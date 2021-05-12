@@ -2,7 +2,7 @@
 	import Alert from "../components/alert.svelte";
 	import { projectConf } from "../conf.js";
 	import { web3, selectedAccount } from "svelte-web3";
-	import { vk } from "../stores/lamden";
+	import { vk, ethBalance } from "../stores/lamden";
 	import BN from 'bignumber.js'
 
 	let tokenName = ""
@@ -256,8 +256,8 @@
 			on:input={handleInput}>
 		</div>
 		<br />
-		<button type="submit" class="btn btn-outline-primary btn-block">
-			Send To Lamden
+		<button type="submit" disabled={$ethBalance.isLessThanOrEqualTo(0)} class="btn btn-outline-primary btn-block">
+			Send Tokens To Lamden
 		</button>
 	</form>
 </div>

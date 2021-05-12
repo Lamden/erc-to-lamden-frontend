@@ -28,6 +28,10 @@
 	.heading > h1 {
 		margin: 0 0 0 0.25rem;
 	}
+	h1 > strong {
+		color: var(--primary-color);
+		margin-left: 10px;
+	}
 </style>
 
 <svelte:head>
@@ -39,7 +43,7 @@
 	<div class="col-md-8 offset-md-2">
 		<div class="heading">
 			<img src="/logo-512.png" alt="lamden-link-logo" />
-			<h1 class="heading text-center">Lamden Link</h1>
+			<h1 class="heading text-center">Lamden Link <strong>TESTNET</strong></h1>
 		</div>
 		{#if $connected}
 			<ImageSwapper />
