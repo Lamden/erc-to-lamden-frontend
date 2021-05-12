@@ -577,7 +577,7 @@ export const projectConf = {
             version: "0.0.5", // any version to start, increment later versions to update connection info
             logo: "/logo-192.png", // or whatever the location of your logo
             contractName: "con_eth_bridge_v2", // Will never change
-            networkType: "testnet", // other option is 'mainnet'
+            networkType: "testnet", // other option is 'mainnet' 
         },
         token: {
             contractName: "con_weth_lst001_v1"
