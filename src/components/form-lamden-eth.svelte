@@ -28,7 +28,6 @@ onMount(() => {
 })
 
 function checkChain (current){
-	console.log(current)
 	if (current.chainId !== projectConf.ethereum.chainId){
 		message = "Switch Metamask to the Kovan Test Network."
 		return
