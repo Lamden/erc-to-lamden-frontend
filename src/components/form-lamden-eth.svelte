@@ -286,7 +286,7 @@ const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
 				{/each}
 			</select>
 			{#if tokenName}
-				<p>Your Lamden balance is: {`${balance.toFixed(18)} ${tokenName}`}</p>
+				<p>{`Your Lamden ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
 			{/if}
 		</div>
 

@@ -256,7 +256,7 @@
 			{/each}
 		</select>
 		{#if tokenName}
-			<p>Your Ethereum balance is: {`${balance.toFixed(18)} ${tokenName}`}</p>
+			<p> {`Your Ethereum ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
 		{/if}
 		</div>
 		<div class="form-group">
