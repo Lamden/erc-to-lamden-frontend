@@ -10,3 +10,17 @@ export const getErrorInfo = (txResults) => {
     }
     return "Transaction returned an unknown error."
 }
+
+export const getCurrentNetwork = () => {
+    if (typeof window === "undefined") return
+    let network = localStorage.getItem("current_network")
+    if (!network) {
+        network = "mainnet"
+        setCurrentNetwork(network)
+    }
+    return network
+}
+
+export const setCurrentNetwork = (network) => {
+    localStorage.setItem("current_network", network)
+}

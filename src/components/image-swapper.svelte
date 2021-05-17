@@ -2,8 +2,9 @@
 	import { onMount } from 'svelte'
 	import { ethToLamdenStore } from "../stores/ethToLamden";
 	import { projectConf } from "../conf.js";
+	import { setCurrentNetwork } from "../utils.js";
 	import { web3, selectedAccount } from "svelte-web3";
-	import { vk, tauBalance, ethBalance } from "../stores/lamden.ts"
+	import { vk, tauBalance, ethBalance, currentNetwork } from "../stores/lamden.ts"
 	import BN from 'bignumber.js'
 
 
@@ -15,6 +16,9 @@
 	export let ethToLamden: boolean;
 
 	let timer = null;
+	let networkSelected = $currentNetwork
+
+	let conf = projectConf[$currentNetwork]
 
 	ethToLamdenStore.subscribe((e2l) => {
 		ethToLamden = e2l;
@@ -44,7 +48,7 @@
 		if (!$vk) return
 		try {
 			const res = await fetch(
-				`${projectConf.lamden.network.apiLink}/states/currency/balances/${$vk}`,
+				`${conf.lamden.network.apiLink}/states/currency/balances/${$vk}`,
 				{
 				method: "GET",
 				}
@@ -69,17 +73,24 @@
 			ethBalance.set(new BN(Web3.utils.fromWei(res, 'ether')))
 		})
 	}
+
+	const handleNetworkChange = (e) => {
+		setCurrentNetwork(e.target.value)
+		currentNetwork.set(e.target.value)
+		location.reload()
+	}
 </script>
 
 	<div class="row">
 	<div class="col">
 		<img src={eth} class="token-img img-thumbnail" alt="" />
-		<p class="img-thumbnail text-center">Kovan Ethereum 
-			<br>
-			<a href="https://faucet.kovan.network/" rel="noopener noreferrer" target="_blank">Kovan ETH Faucet</a>
+		<p class="img-thumbnail text-center">{$currentNetwork === "mainnet" ? "Ethereum" : "Kovan Ethereum"}
+			{#if $currentNetwork === "testnet"}
+				<br>
+				<a href="https://faucet.kovan.network/" rel="noopener noreferrer" target="_blank">Kovan ETH Faucet</a>
+			{/if}
 		</p>
 		<p class="img-thumbnail text-center">{`${$ethBalance.toFixed(8)} ETH`}</p>
-		
 	</div>
 	<div class="switch col" id="arrow" on:click={changePosition}>
 		<img
@@ -92,8 +103,11 @@
 	</div>
 	<div class="col">
 		<img src={lamden} class="token-img img-thumbnail" alt="" />
-		<p class="img-thumbnail text-center">Lamden Testnet</p>
-		<p class="img-thumbnail text-center">{`${$tauBalance.toFixed(8)} ${projectConf.lamden.currencySymbol}`}</p>
+		<select class="img-thumbnail text-center" bind:value={networkSelected} on:change={handleNetworkChange}>
+			<option value="mainnet">Lamden Mainnet</option>
+			<option value="testnet">Lamden Testnet</option>
+		</select>
+		<p class="img-thumbnail text-center">{`${$tauBalance.toFixed(8)} ${conf.lamden.currencySymbol}`}</p>
 	</div>
 </div>
 
@@ -109,5 +123,10 @@
 	.switch > strong {
 		text-decoration: underline;
 		color: var(--primary-color);
+	}
+	select{
+		width: 100%;
+		text-align-last:center;
+		margin-bottom: 1rem;
 	}
 </style>

@@ -1,5 +1,16 @@
 <script lang="ts">
+	import { beforeUpdate } from 'svelte'
+	import { getCurrentNetwork } from "../utils";
+	import { currentNetwork, lwc } from "../stores/lamden";
+	import WalletController from "lamden_wallet_controller";
+
 	import { projectConf } from "../conf.js";
+
+	beforeUpdate(() => {
+		console.log($currentNetwork)
+		if (!$currentNetwork) currentNetwork.set(getCurrentNetwork())
+		if (!$lwc) lwc.set(new WalletController())
+	})
 </script>
 
 <svelte:head>

@@ -1,8 +1,7 @@
 <script lang="ts">
 import {onMount} from 'svelte'
 import Alert from "../components/alert.svelte";
-import WalletController from "lamden_wallet_controller";
-import { vk, tauBalance, ethBalance } from "../stores/lamden";
+import { vk, tauBalance, ethBalance, currentNetwork, lwc } from "../stores/lamden";
 import { web3, selectedAccount, chainData } from "svelte-web3";
 import { projectConf } from "../conf.js";
 import axios from "axios";
@@ -11,11 +10,12 @@ import { getErrorInfo } from "../utils.js"
 
 let isLoading = false;
 let tokenName = ""
+let conf = projectConf[$currentNetwork]
 
 $: message = ""
 $: success = ""
 $: status = ""
-$: buttonDisabled = $ethBalance.isLessThanOrEqualTo(0) || $tauBalance.isLessThanOrEqualTo(0) || $chainData.chainId !== projectConf.ethereum.chainId
+$: buttonDisabled = $ethBalance.isLessThanOrEqualTo(0) || $tauBalance.isLessThanOrEqualTo(0) || $chainData.chainId !== conf.ethereum.chainId
 
 let balance = new BN(0);
 let approval = new BN(0);
@@ -28,28 +28,24 @@ onMount(() => {
 })
 
 function checkChain (current){
-	if (current.chainId !== projectConf.ethereum.chainId){
+	if (current.chainId !== conf.ethereum.chainId){
 		message = "Switch Metamask to the Kovan Test Network."
 		return
 	}
-	if (current.chainId === projectConf.ethereum.chainId && message === "Switch Metamask to the Kovan Test Network."){
+	if (current.chainId === conf.ethereum.chainId && message === "Switch Metamask to the Kovan Test Network."){
 		message = ""
 	}	
 }
 
-const walletController = new WalletController(
-	projectConf.lamden.clearingHouse
-);
-
 async function checkTokenBalance(event) {
 	if (event.target.value) {
 		tokenName = event.target.value;
-		const token = projectConf.ethereum.tokens
+		const token = conf.ethereum.tokens
 			.filter((t) => t.name === tokenName)
 			.pop();
 		try {
 			const res = await fetch(
-				`${projectConf.lamden.network.apiLink}/states/${projectConf.lamden.token.contractName}/balances/${$vk}`,
+				`${conf.lamden.network.apiLink}/states/${conf.lamden.token.contractName}/balances/${$vk}`,
 				{
 					method: "GET",
 				}
@@ -76,7 +72,7 @@ async function checkApproval() {
 	status = "Checking for Approval...";
 	try {
 		const res = await fetch(
-			`${projectConf.lamden.network.apiLink}/states/${projectConf.lamden.token.contractName}/balances/${$vk}:${projectConf.lamden.clearingHouse.contractName}`,
+			`${conf.lamden.network.apiLink}/states/${conf.lamden.token.contractName}/balances/${$vk}:${conf.lamden.clearingHouse.contractName}`,
 			{
 				method: "GET",
 			}
@@ -100,16 +96,16 @@ async function checkApproval() {
 const sendApproval = (amountToApprove) => new Promise(resolve => {
 	status = "Sending Lamden approval (check popup)...";
 	const txInfo = {
-		networkType: projectConf.lamden.clearingHouse.networkType,
-		contractName: projectConf.lamden.token.contractName,
+		networkType: conf.lamden.clearingHouse.networkType,
+		contractName: conf.lamden.token.contractName,
 		methodName: "approve",
 		kwargs: {
 			amount: { "__fixed__": amountToApprove.toFixed(18) },
-			to: projectConf.lamden.clearingHouse.contractName
+			to: conf.lamden.clearingHouse.contractName
 		},
-		stampLimit: projectConf.lamden.stamps.approval,
+		stampLimit: conf.lamden.stamps.approval,
 	};
-	walletController.sendTransaction(txInfo, async (txResults) => {
+	lwc.sendTransaction(txInfo, async (txResults) => {
 		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
 			message = "Transaction canceled by user."
@@ -134,17 +130,17 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 const sendBurn = (token, amount) => new Promise(resolve => {
 	const ethereum_contract = token.address;
 	const txInfo = {
-		networkType: projectConf.lamden.clearingHouse.networkType,
+		networkType: conf.lamden.clearingHouse.networkType,
 		methodName: "burn",
 		kwargs: {
 			ethereum_contract,
 			ethereum_address: $selectedAccount,
 			amount: { "__fixed__": amount.toFixed(18) },
 		},
-		stampLimit: projectConf.lamden.stamps.burn,
+		stampLimit: conf.lamden.stamps.burn,
 	};
 
-	walletController.sendTransaction(txInfo, async (txResults) => {
+	lwc.sendTransaction(txInfo, async (txResults) => {
 		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
 			message = "Transaction canceled by user."
@@ -161,8 +157,8 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 
 					const amountHex = "0x" + unSignedABI.substring(65, 129);
 					const clearingHouseContract = new $web3.eth.Contract(
-						projectConf.ethereum.clearingHouse.abi,
-						projectConf.ethereum.clearingHouse.address
+						conf.ethereum.clearingHouse.abi,
+						conf.ethereum.clearingHouse.address
 					);
 					const obj = {
 						unSignedABI,
@@ -206,7 +202,7 @@ async function startBurn(event) {
 
 	let amount = new BN(formData.get("quantity"));
 
-	const token = projectConf.ethereum.tokens
+	const token = conf.ethereum.tokens
 		.filter((t) => t.name === tokenName)
 		.pop();
 
@@ -225,11 +221,11 @@ async function startBurn(event) {
 	let currentApprovalAmount = await checkApproval()
 
 	if (currentApprovalAmount.isLessThan(amount)){
-		if ($tauBalance.isLessThan(projectConf.lamden.stamps.approval / projectConf.lamden.currentStampRatio)){
+		if ($tauBalance.isLessThan(conf.lamden.stamps.approval / conf.lamden.currentStampRatio)){
 			status = ""
 			isLoading = false;
-			message =  `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions.
-						Send ${projectConf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
+			message =  `Not enough Lamden ${conf.lamden.currencySymbol} to send transactions.
+						Send ${conf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
 			return;
 		}else{
 			if (!await sendApproval(amount)) {
@@ -239,11 +235,11 @@ async function startBurn(event) {
 		}
 	}
 
-	if ($tauBalance.isLessThan(projectConf.lamden.stamps.burn / projectConf.lamden.currentStampRatio)){
+	if ($tauBalance.isLessThan(conf.lamden.stamps.burn / conf.lamden.currentStampRatio)){
 		isLoading = false;
 		status = ""
-		message =   `Not enough Lamden ${projectConf.lamden.currencySymbol} to send transactions.
-					Send ${projectConf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
+		message =   `Not enough Lamden ${conf.lamden.currencySymbol} to send transactions.
+					Send ${conf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
 		return;
 	}else{
 		status = `Sending ${token.name} tokens from Lamden to Ethereum (check for popup)...`
@@ -281,7 +277,7 @@ const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
 				id="tokenName"
 				>
 				<option value="">Select Token</option>
-				{#each projectConf.ethereum.tokens as token}
+				{#each conf.ethereum.tokens as token}
 					<option value={token.name}>{token.name}</option>
 				{/each}
 			</select>

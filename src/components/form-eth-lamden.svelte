@@ -3,16 +3,17 @@
 	import Alert from "../components/alert.svelte";
 	import { projectConf } from "../conf.js";
 	import { web3, selectedAccount, chainData } from "svelte-web3";
-	import { vk, ethBalance } from "../stores/lamden";
+	import { vk, ethBalance, currentNetwork } from "../stores/lamden";
 	import BN from 'bignumber.js'
 
 	let tokenName = ""
 	let isLoading = false;
+	let conf = projectConf[$currentNetwork]
 
 	$: message = "";
 	$: success = "";
 	$: status = ""
-	$: buttonDisabled = $chainData.chainId !== projectConf.ethereum.chainId || $ethBalance.isLessThanOrEqualTo(0)
+	$: buttonDisabled = $chainData.chainId !== conf.ethereum.chainId || $ethBalance.isLessThanOrEqualTo(0)
 
 	let balance = new BN(0);
 
@@ -23,11 +24,11 @@
 	})
 
 	function checkChain (current){
-		if (current.chainId !== projectConf.ethereum.chainId){
-			message = "Switch Metamask to the Kovan Test Network."
+		if (current.chainId !== conf.ethereum.chainId){
+			message = `Switch Metamask to ${conf.ethereum.networkName}.`
 			return
 		}
-		if (current.chainId === projectConf.ethereum.chainId && message === "Switch Metamask to the Kovan Test Network."){
+		if (current.chainId === conf.ethereum.chainId && message === `Switch Metamask to ${conf.ethereum.networkName}.`){
 			message = ""
 		}	
 	}
@@ -39,7 +40,7 @@
 	async function checkTokenBalance(event) {
 		if (event.target.value) {
 			tokenName = event.target.value;
-			const token = projectConf.ethereum.tokens
+			const token = conf.ethereum.tokens
 				.filter((t) => t.name === tokenName)
 				.pop();
 			try {
@@ -127,7 +128,7 @@
 		const recipient = $vk;
 		let quantity = new BN(formData.get("quantity"));
 
-		const token = projectConf.ethereum.tokens
+		const token = conf.ethereum.tokens
 		.filter((t) => t.name === tokenName)
 		.pop();
 
@@ -160,8 +161,8 @@
 
 		const erc20TokenContract = new $web3.eth.Contract(token.abi, token.address);
 		const clearingHouseContract = new $web3.eth.Contract(
-			projectConf.ethereum.clearingHouse.abi,
-			projectConf.ethereum.clearingHouse.address
+			conf.ethereum.clearingHouse.abi,
+			conf.ethereum.clearingHouse.address
 		);
 
 		try {
@@ -189,7 +190,7 @@
 		try {
 			status = "Sending Etherum token approval..."
 			const approval = await erc20TokenContract.methods
-				.approve(projectConf.ethereum.clearingHouse.address, quantity.toString())
+				.approve(conf.ethereum.clearingHouse.address, quantity.toString())
 				.send({ from: $selectedAccount });
 
 			if (approval.status === true) {
@@ -251,7 +252,7 @@
 			id="tokenName"
 		>
 			<option value="">Select Token</option>
-			{#each projectConf.ethereum.tokens as token}
+			{#each conf.ethereum.tokens as token}
 				<option value={token.name}>{token.name}</option>
 			{/each}
 		</select>
