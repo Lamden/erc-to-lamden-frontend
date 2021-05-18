@@ -41,9 +41,11 @@ function sign(data, network) {
 
 exports.handler = async function(event) {
 	if (event.httpMethod === "GET") return {statusCode: 500}
-	let network = event.queryStringParameters.network
+	const { network } = event.queryStringParameters
+
+	console.log(network)
 	if (!network) return {statusCode: 500}
-	if (network !== "testnet" || network !== "mainnet") return {statusCode: 500}
+	if (network !== "testnet" && network !== "mainnet") return {statusCode: 500}
 
 	let unSignedABI = event.body;
 	unSignedABI = unSignedABI.substring(1, unSignedABI.length - 1);
