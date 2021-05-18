@@ -35,7 +35,7 @@ const mainnet = {
         chainId: 1,
         networkName: "Ethereum Mainnet",
         clearingHouse: {
-            address: '0x1b8AFdf00eac15B45bA38FB1c5e92037442Ed3bA',
+            address: '0x7f15e7c3dff596291727f1ba46e98d5de0697e3d',
             abi: [
                 {
                     "inputs": [
@@ -290,7 +290,7 @@ const mainnet = {
         },
         tokens: [{
             name: 'WETH',
-            address: '0xd0A1E359811322d97991E03f863a0C30C2cF029C',
+            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             decimals: 18,
             abi: [
                 {
@@ -589,8 +589,7 @@ const mainnet = {
                 }
             ]
         }]
-    },
-    serverLink: 'http://localhost:3001'
+    }
 }
 
 const testnet = {
@@ -1174,8 +1173,7 @@ const testnet = {
                 }
             ]
         }]
-    },
-    serverLink: 'http://localhost:3001'
+    }
 }
 
 export const projectConf = {
