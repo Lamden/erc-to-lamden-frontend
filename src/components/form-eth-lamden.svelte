@@ -117,7 +117,7 @@
 
 		return new BN(wei.toString(10), 10);
 	}
-
+nano
 	async function startSwap(event) {
 		isLoading = true
 		message = ""

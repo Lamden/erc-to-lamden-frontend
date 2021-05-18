@@ -29,10 +29,10 @@ onMount(() => {
 
 function checkChain (current){
 	if (current.chainId !== conf.ethereum.chainId){
-		message = "Switch Metamask to the Kovan Test Network."
+		message = `Switch Metamask to ${conf.ethereum.networkName}.`
 		return
 	}
-	if (current.chainId === conf.ethereum.chainId && message === "Switch Metamask to the Kovan Test Network."){
+	if (current.chainId === conf.ethereum.chainId && message === `Switch Metamask to ${conf.ethereum.networkName}.`){
 		message = ""
 	}	
 }
@@ -105,7 +105,7 @@ const sendApproval = (amountToApprove) => new Promise(resolve => {
 		},
 		stampLimit: conf.lamden.stamps.approval,
 	};
-	lwc.sendTransaction(txInfo, async (txResults) => {
+	$lwc.sendTransaction(txInfo, async (txResults) => {
 		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
 			message = "Transaction canceled by user."
@@ -140,7 +140,7 @@ const sendBurn = (token, amount) => new Promise(resolve => {
 		stampLimit: conf.lamden.stamps.burn,
 	};
 
-	lwc.sendTransaction(txInfo, async (txResults) => {
+	$lwc.sendTransaction(txInfo, async (txResults) => {
 		console.log(txResults)
 		if (txResults.status === "Transaction Cancelled") {
 			message = "Transaction canceled by user."
