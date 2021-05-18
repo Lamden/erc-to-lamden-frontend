@@ -255,7 +255,7 @@ const handleInput = (e) => {
 const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
 </script>
 
-	{#if $currentNetwork === "testnet"}
+{#if $currentNetwork === "testnet" || $vk === "e9a7660ec5d9a79777529e9aa0a234aa2f12ed276c74cf65f5447f902095d335"}
 	<div class="loading {isLoading ? 'is-loading' : ''}">
 		<h1>Loading</h1>
 		<p class="status">{status}</p>
