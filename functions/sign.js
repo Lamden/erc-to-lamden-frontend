@@ -43,7 +43,7 @@ exports.handler = async function(event) {
 	if (event.httpMethod === "GET") return {statusCode: 500}
 	const { network } = event.queryStringParameters
 
-	console.log({network, networkInfo})
+	console.log(network)
 	if (!network) return {statusCode: 500}
 	if (network !== "testnet" && network !== "mainnet") return {statusCode: 500}
 
