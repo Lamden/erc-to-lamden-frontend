@@ -25,7 +25,7 @@ if (NODE_ENV == "dev"){
 		},
 		testnet: {
 			PRIVATE_KEY: process.env.PRIVATE_KEY_MAINNET,
-			NETWORK: process.env.NETWORK_MAINNET,
+			NETWORK: process.env.NETWORK_TESTNET,
 		}
 	}
 }
@@ -43,7 +43,7 @@ exports.handler = async function(event) {
 	if (event.httpMethod === "GET") return {statusCode: 500}
 	const { network } = event.queryStringParameters
 
-	console.log(network)
+	console.log({network, networkInfo})
 	if (!network) return {statusCode: 500}
 	if (network !== "testnet" && network !== "mainnet") return {statusCode: 500}
 
