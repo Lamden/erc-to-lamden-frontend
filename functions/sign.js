@@ -24,7 +24,7 @@ if (NODE_ENV == "dev"){
 			NETWORK: process.env.NETWORK_MAINNET,
 		},
 		testnet: {
-			PRIVATE_KEY: process.env.PRIVATE_KEY_MAINNET,
+			PRIVATE_KEY: process.env.PRIVATE_KEY_TESTNET,
 			NETWORK: process.env.NETWORK_TESTNET,
 		}
 	}
