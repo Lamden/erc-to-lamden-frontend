@@ -255,65 +255,61 @@
 	const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
 </script>
 
-{#if $currentNetwork === "testnet"}
-	<div class="loading {isLoading ? 'is-loading' : ''}">
-		<h1>Loading</h1>
-		<p class="status">{status}</p>
-	</div>
+<div class="loading {isLoading ? 'is-loading' : ''}">
+	<h1>Loading</h1>
+	<p class="status">{status}</p>
+</div>
 
-	<div class="row" style="margin-top: 3rem">
-		<Alert {message} type={"danger"} />
-		<Alert message={success} type={"success"} />
-		<form
-			on:submit|preventDefault={startBurn}
-			action="#"
-			method="POST"
-			style="width: 100%">
-			<div class="form-group">
-				<label for="tokenName">Token Name</label>
-				<select
-					class="form-control"
-					on:change={checkTokenBalance}
-					name="tokenName"
-					id="tokenName"
-					>
-					<option value="">Select Token</option>
-					{#each conf.ethereum.tokens as token}
-						<option value={token.name}>{token.name}</option>
-					{/each}
-				</select>
-				{#if tokenName}
-					<p>{`Your Lamden ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
-				{/if}
-			</div>
+<div class="row" style="margin-top: 3rem">
+	<Alert {message} type={"danger"} />
+	<Alert message={success} type={"success"} />
+	<form
+		on:submit|preventDefault={startBurn}
+		action="#"
+		method="POST"
+		style="width: 100%">
+		<div class="form-group">
+			<label for="tokenName">Token Name</label>
+			<select
+				class="form-control"
+				on:change={checkTokenBalance}
+				name="tokenName"
+				id="tokenName"
+				>
+				<option value="">Select Token</option>
+				{#each conf.ethereum.tokens as token}
+					<option value={token.name}>{token.name}</option>
+				{/each}
+			</select>
+			{#if tokenName}
+				<p>{`Your Lamden ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
+			{/if}
+		</div>
 
-			<div class="form-group">
-				<label for="quantity">Amount</label>
-				<input 
-					class="form-control"
-					type="text"
-					placeholder=""
-					name="quantity"
-					id="quantity"
-					required 
-					pattern="^\d*\.?\d*$"
-					on:invalid={handleInvalid}
-					on:input={handleInput}>
-			</div>
+		<div class="form-group">
+			<label for="quantity">Amount</label>
+			<input 
+				class="form-control"
+				type="text"
+				placeholder=""
+				name="quantity"
+				id="quantity"
+				required 
+				pattern="^\d*\.?\d*$"
+				on:invalid={handleInvalid}
+				on:input={handleInput}>
+		</div>
 
-			<br />
+		<br />
 
-			<button 
-				type="submit" 
-				disabled={buttonDisabled} 
-				class="btn btn-outline-primary btn-block">
-				Send Tokens To Ethereum
-			</button>
-		</form>
-	</div>
-{:else}
-	<p>Mainnet Currently not supported.</p>
-{/if}
+		<button 
+			type="submit" 
+			disabled={buttonDisabled} 
+			class="btn btn-outline-primary btn-block">
+			Send Tokens To Ethereum
+		</button>
+	</form>
+</div>
 
 <style>
 	.loading {
