@@ -7,7 +7,6 @@
 	import { projectConf } from "../conf.js";
 
 	beforeUpdate(() => {
-		console.log($currentNetwork)
 		if (!$currentNetwork) currentNetwork.set(getCurrentNetwork())
 		if (!$lwc) lwc.set(new WalletController())
 	})

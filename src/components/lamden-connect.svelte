@@ -9,7 +9,6 @@
 
 	onMount(() => {
 		$lwc.walletIsInstalled().then((installed) => {
-			console.log(installed)
 			if (!installed) {
 				walletErrorMessage = "Lamden wallet extension not found";
 			}else{
@@ -25,7 +24,6 @@
 	})
 
 	const handleNewInfo = (data) => {
-		console.log(data)
 		$lamdenWalletInfo = data;
 		const { errors } = data;
 		if (errors && errors.length > 0) {

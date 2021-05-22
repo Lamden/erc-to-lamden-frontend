@@ -3,7 +3,7 @@
 	import { ethToLamdenStore } from "../stores/ethToLamden";
 	import { projectConf } from "../conf.js";
 	import { setCurrentNetwork } from "../utils.js";
-	import { web3, selectedAccount } from "svelte-web3";
+	import { web3, selectedAccount, chainData } from "svelte-web3";
 	import { vk, tauBalance, ethBalance, currentNetwork } from "../stores/lamden.ts"
 	import BN from 'bignumber.js'
 
@@ -19,6 +19,8 @@
 	let networkSelected = $currentNetwork
 
 	let conf = projectConf[$currentNetwork]
+
+	chainData.subscribe(current => checkETHBalance())
 
 	ethToLamdenStore.subscribe((e2l) => {
 		ethToLamden = e2l;
