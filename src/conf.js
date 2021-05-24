@@ -1,3 +1,7 @@
+/*
+    Both testnet and mainet obects below need infura network details (projectID)
+*/
+
 const DOMAIN_NAME = "https://www.lamdenlink.com"
 
 const site = {
@@ -31,7 +35,7 @@ const mainnet = {
         }
     },
     ethereum: {
-        network: "wss://mainnet.infura.io/ws/v3/5ef3994ede0945f6beb3fbddef483643",
+        network: "wss://mainnet.infura.io/ws/v3/??????????????",
         chainId: 1,
         networkName: "Ethereum Mainnet",
         clearingHouse: {
@@ -633,7 +637,7 @@ const testnet = {
         }
     },
     ethereum: {
-        network: "wss://kovan.infura.io/ws/v3/63ded85a9a5442c6ae2b94c2e97fb8c4",
+        network: "wss://kovan.infura.io/ws/v3/?????????????",
         chainId: 42,
         networkName: "Kovan Test Network",
         clearingHouse: {

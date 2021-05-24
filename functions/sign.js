@@ -12,8 +12,8 @@ let networkInfo = {}
 if (NODE_ENV == "dev"){
 	networkInfo = {
 		testnet: {
-			PRIVATE_KEY: '0617daa72f2a44536f58e34aaa641beb8a19933a392efd059bd7eeb7348999ca',
-			NETWORK: 'wss://kovan.infura.io/ws/v3/5ef3994ede0945f6beb3fbddef483643'
+			PRIVATE_KEY: process.env.PRIVATE_KEY_TESTNET,
+			NETWORK: process.env.NETWORK_TESTNET,
 		}
 	}
 
