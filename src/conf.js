@@ -12,6 +12,7 @@ const mainnet = {
     lamden: {
         network: {
             apiLink: "https://mainnet.lamden.io/api",
+            blockexplorer: "https://mainnet.lamden.io"
         },
         clearingHouse: {
             appName: "Lamden Link", // Your DAPPS's name
@@ -32,6 +33,7 @@ const mainnet = {
     },
     ethereum: {
         network: "wss://mainnet.infura.io/ws/v3/5ef3994ede0945f6beb3fbddef483643",
+        blockexplorer: "https://etherscan.io",
         chainId: 1,
         networkName: "Ethereum Mainnet",
         clearingHouse: {
@@ -614,10 +616,11 @@ const testnet = {
     lamden: {
         network: {
             apiLink: "https://testnet.lamden.io/api",
+            blockexplorer: "https://testnet.lamden.io"
         },
         clearingHouse: {
             appName: "Lamden Link", // Your DAPPS's name
-            version: "0.0.5", // any version to start, increment later versions to update connection info
+            version: "5.0.0", // any version to start, increment later versions to update connection info
             logo: "/logo-192.png", // or whatever the location of your logo
             contractName: "con_eth_bridge_v2", // Will never change
             networkType: "testnet", // other option is 'mainnet' 
@@ -634,6 +637,7 @@ const testnet = {
     },
     ethereum: {
         network: "wss://kovan.infura.io/ws/v3/63ded85a9a5442c6ae2b94c2e97fb8c4",
+        blockexplorer: "https://kovan.etherscan.io",
         chainId: 42,
         networkName: "Kovan Test Network",
         clearingHouse: {

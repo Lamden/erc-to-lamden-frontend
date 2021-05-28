@@ -24,3 +24,19 @@ export const getCurrentNetwork = () => {
 export const setCurrentNetwork = (network) => {
     localStorage.setItem("current_network", network)
 }
+
+export const checkEthTxStatus = async (txHash, web3) => {
+    console.log({checking: txHash})
+    try{
+        let response =  await web3.eth.getTransactionReceipt(txHash)
+        console.log(response)
+        return response
+    } catch (e) {}
+    return false
+}
+
+export const checkEthTransactionUntilResult = async (txHash, web3, resolver) => {
+    let txHashInfo = await checkEthTxStatus(txHash, web3)
+    if (!txHashInfo || !txHashInfo.status) setTimeout(() => checkEthTransactionUntilResult(txHash, web3, resolver), 5000)
+    else resolver(txHashInfo)
+}
