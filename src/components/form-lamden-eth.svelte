@@ -427,7 +427,7 @@
 	const handleTxHashInvalid = (e) => e.target.setCustomValidity('Invalid Lamden Transaction Hash')
 </script>
 
-{#if conf.lamden.clearingHouse.networkType === 'mainnet'}
+{#if true}
 	<Alert message={"Swap Back to Ethereum is currently disabled. Sorry for the inconvenience."} type={"danger"} /> 
 {:else}
 	<div class="loading {isLoading ? 'is-loading' : ''}">
