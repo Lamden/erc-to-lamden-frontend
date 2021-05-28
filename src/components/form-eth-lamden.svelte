@@ -2,6 +2,7 @@
 	import {onMount} from 'svelte'	
 	import Alert from "../components/alert.svelte";
 	import { projectConf } from "../conf.js";
+	import { checkEthTransactionUntilResult } from "../utils.js";
 	import { web3, selectedAccount, chainData } from "svelte-web3";
 	import { vk, ethBalance, currentNetwork } from "../stores/lamden";
 	import BN from 'bignumber.js'
@@ -9,6 +10,8 @@
 	let tokenName = ""
 	let isLoading = false;
 	let conf = projectConf[$currentNetwork]
+	let ethApprovalTxHash = {hash: "", success: false}
+	let ethDepositTxHash = {hash: "", success: false}
 
 	$: message = "";
 	$: success = "";
@@ -119,12 +122,15 @@
 	}
 
 	async function startSwap(event) {
+		ethApprovalTxHash = {hash: "", success: false}
+		ethDepositTxHash = {hash: "", success: false}
+
 		isLoading = true
 		message = ""
 		status = ""
 
 		const formData = new FormData(event.target);
-		const tokenName = formData.get("tokenName").toString();
+		tokenName = formData.get("tokenName").toString();
 		const recipient = $vk;
 		let quantity = new BN(formData.get("quantity"));
 
@@ -187,38 +193,62 @@
 			return;
 		}
 
-		try {
-			status = "Sending Etherum token approval..."
-			const approval = await erc20TokenContract.methods
+		status = "Sending Ethereum token approval transaction (check for metamask popup)..."
+		let approvalTxHashResult = await new Promise(resolver => {
+			const approve = erc20TokenContract.methods
 				.approve(conf.ethereum.clearingHouse.address, quantity.toString())
-				.send({ from: $selectedAccount });
 
-			if (approval.status === true) {
-				status = `Sending ${token.name} tokens from Ethereum to Lamden...`
-				const swaped = await clearingHouseContract.methods
-				.deposit(token.address, quantity.toString(), recipient)
-				.send({ from: $selectedAccount });
+			try{
+				approve.send({ from: $selectedAccount }).once('transactionHash', (hash) => {
+					ethApprovalTxHash.hash = hash
+					checkEthTransactionUntilResult(ethApprovalTxHash.hash, $web3, resolver)
+				})
+				.catch(err => {
+					if (err.code === 4001) resolver({status: false, message:"User denied Metamask popup."})
+					else resolver({status: false})					
+				})
+			}catch (err) {
+				resolver({status: false})
+			}
+		})
 
-				if (swaped.status) {
-					isLoading = false;
-					success = "Swapping was successful";
-					return;
-				} else {
-					throw new Error("Clearing house status is not true.");
-				}
-			} else {
-				throw new Error("Erc20 Status is not true.");
-			}
-		} catch (error) {
-			console.log(error);
-			if (error.code && error.code === 4001) {
-				message = "Transaction canceled by user.";
-			} else {
-				message = "Transaction failed.";
-			}
-			isLoading = false;
-			return;
+		if (!approvalTxHashResult.status){
+			message = approvalTxHashResult.message || "Error sending Ethereum Transaction."
+			ethApprovalTxHash.success = false
+			return
+		}else{
+			ethApprovalTxHash.success = true 
 		}
+
+		status = `Sending Ethereum ${tokenName} deposit transaction (check for metamask popup)...`
+		let depositTxHashResult = await new Promise(resolver => {
+			const deposit = clearingHouseContract.methods
+				.deposit(token.address, quantity.toString(), recipient)
+
+			try{
+				deposit.send({ from: $selectedAccount }).once('transactionHash', (hash) => {
+					ethDepositTxHash.hash = hash
+					checkEthTransactionUntilResult(ethDepositTxHash.hash, $web3, resolver)
+				})
+				.catch(err => {
+					if (err.code === 4001) resolver({status: false, message:"User denied Metamask popup."})
+					else resolver({status: false})					
+				})
+			}catch (err) {
+				resolver({status: false})
+			}
+		})
+
+		if (!depositTxHashResult.status){
+			message = depositTxHashResult.message || "Error sending Ethereum Transaction."
+			ethDepositTxHash.success = false
+			return
+		}else{
+			ethDepositTxHash.success = true 
+		}
+
+		isLoading = false;
+		success = "Swapping was successful";
 	}
 
 	const handleInput = (e) => {
@@ -229,13 +259,52 @@
 
 </script>
 <div class="loading {isLoading ? 'is-loading' : ''}">
-	<h1>Loading</h1>
+	<h1>Processing</h1>
 	<p class="status">{status}</p>
+	{#if ethApprovalTxHash.hash}
+		<a href="{`${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+			{`Etheruem Approval: ${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash.substring(0, 12)}...`}
+		</a>
+		<br>
+	{/if}
+	{#if ethDepositTxHash.hash}
+		<a href="{`${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+			{`Etheruem Deposit: ${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash.substring(0, 12)}...`}
+		</a>
+	{/if}
 </div>
 
 <div class="row" style="margin-top: 3rem">
-	<Alert {message} type={"danger"} />
-	<Alert message={success} type={"success"} />
+	<Alert {message} type={"danger"} >
+		<div slot="tx_hash">
+			{#if ethApprovalTxHash.hash}
+				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+					{`Etheruem Approval: ${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash.substring(0, 12)}...`}
+				</a>
+				<br>
+			{/if}
+			{#if ethDepositTxHash.hash}
+				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+					{`Etheruem Deposit: ${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash.substring(0, 12)}...`}
+				</a>
+			{/if}
+		</div>
+	</Alert>
+	<Alert message={success} type={"success"}>
+		<div slot="tx_hash">
+			{#if ethApprovalTxHash.hash}
+				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+					{`Etheruem Approval: ${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash.substring(0, 12)}...`}
+				</a>
+				<br>
+			{/if}
+			{#if ethDepositTxHash.hash}
+				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+					{`Etheruem Deposit: ${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash.substring(0, 12)}...`}
+				</a>
+			{/if}
+		</div>
+	</Alert>
 	<form
 		on:submit|preventDefault={startSwap}
 		action="#"
@@ -287,7 +356,7 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(249, 249, 249, 0.7);
+		background-color: rgba(249, 249, 249, 0.9);
 	}
 	.is-loading {
 		display: block;

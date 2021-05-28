@@ -6,11 +6,15 @@
 	import { projectConf } from "../conf.js";
 	import axios from "axios";
 	import BN from 'bignumber.js'
-	import { getErrorInfo } from "../utils.js"
+	import { getErrorInfo, checkEthTransactionUntilResult } from "../utils.js"
 
 	let isLoading = false;
+	let newSwap = true;
 	let tokenName = ""
 	let conf = projectConf[$currentNetwork]
+	let ethTxHash = {hash: "", success: false}
+	let lamdenApprovalTxHash = {hash: "", success: false}
+	let lamdenBurnTxHash = {hash: "", success: false}
 
 	$: message = ""
 	$: success = ""
@@ -19,7 +23,6 @@
 
 	let balance = new BN(0);
 	let approval = new BN(0);
-	let selectedTokenName = ""
 
 	chainData.subscribe(current => checkChain(current))
 
@@ -111,17 +114,22 @@
 				message = "Transaction canceled by user."
 				resolve(false)
 			}
-
+			if (txResults.data) {
+				if (txResults.data.txHash) lamdenApprovalTxHash.hash =  txResults.data.txHash
+			}
 			if (txResults.status === "success") {
 				try {
 					status = "Lamden approval sent...";
+					lamdenApprovalTxHash.success = true
 					resolve(true)
 				} catch (error) {
 					message = 'Transaction failed';
+					lamdenApprovalTxHash.success = false
 					resolve(false)
 				}
 			} else {
 				message = getErrorInfo(txResults)
+				lamdenApprovalTxHash.success = false
 				resolve(false)
 			}
 		});	
@@ -145,66 +153,149 @@
 			if (txResults.status === "Transaction Cancelled") {
 				message = "Transaction canceled by user."
 			}else{
+				if (txResults.data) {
+					if (txResults.data.txHash) lamdenBurnTxHash.hash = txResults.data.txHash
+				}
 				if (txResults.status === "success") {
 					try {
 						const unSignedABI = txResults.data.txBlockResult.result
-						const res = await axios.post(`/.netlify/functions/sign?network=${$currentNetwork}`, unSignedABI, {
-							headers: { 'Content-Type': 'text/plain' }
-						});
-						const sign = await res.data;
-						const nonce = "0x" + unSignedABI.substring(129, 193);
-						const { v, r, s } = sign;
-
-						const amountHex = "0x" + unSignedABI.substring(65, 129);
-						const clearingHouseContract = new $web3.eth.Contract(
-							conf.ethereum.clearingHouse.abi,
-							conf.ethereum.clearingHouse.address
-						);
-						const obj = {
-							unSignedABI,
-							token: token.address,
-							amount: amountHex,
-							nonce: nonce,
-							v,
-							r,
-							s,
-						};
-						const withdrawRes = await clearingHouseContract.methods
-							.withdraw(obj.token, obj.amount, obj.nonce, obj.v, obj.r, obj.s)
-							.send({ from: $selectedAccount });
-
-						success = 'WETH tokens sent to Ethereum Chain';
-						isLoading = false;
-						status = ""
-
-						resolve(true)
-
+						lamdenBurnTxHash.success = true
+						resolve(unSignedABI)
+						return
 					} catch (error) {
 						message = 'Transaction failed';
+						lamdenBurnTxHash.success = false
+						isLoading = false;
 					}
 				} else {
+					lamdenBurnTxHash.success = false
 					message = getErrorInfo(txResults)
 				}
 			}
 			status = ""
-			resolve(false)
 			isLoading = false;
+			resolve(false)
 		});
 	})
 
+	const getUnsignedABIFromBlockchain = (txHash) => new Promise(resolve => {
+		fetch(`${conf.lamden.network.apiLink}/transactions/get/${txHash}`)
+		.then(res => {
+			if (res.status === 404) throw new Error()
+			else return res.json()
+		})
+		.then((json) => {
+			console.log({json})
+			if (!json) resolve(false)
+			else{
+				if (!json.result || json.result === null || json.result === "None") resolve(false)
+				else resolve(json.result)	
+			}
+		})
+		.catch(err => resolve(false))
+	})
+
+	const getProof = (unSignedABI) => new Promise(resolve => {
+		let timesToCheck = 60
+		let timesChecked = 0
+
+		const checkAgain = () => {
+			timesChecked = timesChecked + 1
+			if (timesChecked <= timesToCheck) setTimeout(checkForProof, 1000)
+			else{
+				message =   `Timed out attempting to get Proof of Burn from the Lamden Blockchain. Checked ${timesToCheck} times.`;
+				resolve(false)
+			}
+		}
+
+		const checkForProof = async () => {
+			console.log({timesChecked})
+			fetch(`${conf.lamden.network.apiLink}/states/${conf.lamden.clearingHouse.contractName}/proofs/${unSignedABI.replace(/'/g, "")}`)
+			.then(res => res.json())
+			.then((json) => {
+				console.log({json})
+				if (!json) {
+					checkAgain()
+					return
+				}
+				if (!json.value || json.value === null) {
+					checkAgain()
+					return
+				}
+				resolve(json.value)
+			})
+		}
+		checkForProof()
+	})
+
+	const processProof = (unSignedABI, signedABI) => {
+		try{
+			signedABI = signedABI.substr(2); //remove 0x
+			const r = '0x' + signedABI.slice(0, 64)
+			const s = '0x' + signedABI.slice(64, 128)
+			const v = '0x' + signedABI.slice(128, 130)
+
+			const amountHex = "0x" + unSignedABI.substring(65, 129);
+			const nonce = "0x" + unSignedABI.substring(129, 193);
+
+			const token = conf.ethereum.tokens.find((t) => t.name === 'WETH')
+
+			 if (!token || !r || !v || !s || !unSignedABI || !nonce) return false
+
+			return  {
+				unSignedABI,
+				token: token.address,
+				amount: amountHex,
+				nonce: nonce,
+				v,
+				r,
+				s,
+			}
+		}catch(e){
+			console.log(e)
+			return false
+		}
+	}
+
+	const sendProofToEthereum = async (proofData) => {
+		const clearingHouseContract = new $web3.eth.Contract(
+			conf.ethereum.clearingHouse.abi,
+			conf.ethereum.clearingHouse.address
+		);
+
+		let withdraw = clearingHouseContract.methods
+						.withdraw(proofData.token, proofData.amount, proofData.nonce, proofData.v, proofData.r, proofData.s)
+
+		return await new Promise(resolver => {
+			try{
+				withdraw.send({from: $selectedAccount}).once('transactionHash', (hash) => {
+					ethTxHash.hash = hash
+					checkEthTransactionUntilResult(ethTxHash.hash, $web3, resolver)
+				})
+				.catch(err => {
+					if (err.code === 4001) resolver({status: false, message:"User denied Metamask popup."})
+					else resolver({status: false})					
+				})
+			}catch (err) {
+				resolver({status: false})
+			}
+		})
+	}
+
 	async function startBurn(event) {
+		ethTxHash = {hash: "", success: false}
+		lamdenApprovalTxHash = {hash: "", success: false}
+		lamdenBurnTxHash = {hash: "", success: false}
 		isLoading = true
 		message = ""
 		status = ""
 		success = ""
 		const formData = new FormData(event.target);
-		const tokenName = formData.get("tokenName").toString();
+		tokenName = formData.get("tokenName").toString();
 
 		let amount = new BN(formData.get("quantity"));
 
-		const token = conf.ethereum.tokens
-			.filter((t) => t.name === tokenName)
-			.pop();
+		const token = conf.ethereum.tokens.find((t) => t.name === tokenName)
 
 		if (!token) {
 			isLoading = false;
@@ -240,76 +331,249 @@
 			status = ""
 			message =   `Not enough Lamden ${conf.lamden.currencySymbol} to send transactions.
 						Send ${conf.lamden.currencySymbol} to your Lamden Link account from within the Lamden Wallet.`;
-			return;
 		}else{
-			status = `Sending ${token.name} tokens from Lamden to Ethereum (check for popup)...`
-			sendBurn(token, amount)
+			status = `Attempting to Burn ${token.name} tokens on the Lamden Blockchain (check for Lamden Wallet popup)...`
+			const unSignedABI = await sendBurn(token, amount)
+			console.log({status, isLoading})
+
+			if (!unSignedABI){
+				isLoading = false;
+				status = ""
+				message = `Unable to Burn ${WETH} tokens on the Lamden Blockchain.`;
+			}else{
+				console.log({status, isLoading})
+				continueBurn(unSignedABI)
+			}
 		}
-		
 	}
 
-	const handleInput = (e) => {
+	const resumeBurn = async () => {
+		ethTxHash = {hash: "", success: false}
+		lamdenApprovalTxHash = {hash: "", success: false}
+		lamdenBurnTxHash = {hash: "", success: false}
+
+		const formData = new FormData(event.target);
+		const txHash = formData.get("txHash").toString();
+
+		isLoading = true;
+		message = "";
+		status = `Checking Lamden Blockchain for Proof of token Burn...`
+
+		const unSignedABI = await getUnsignedABIFromBlockchain(txHash)
+		console.log({unSignedABI})
+		console.log({status})
+		if (unSignedABI) {
+			lamdenBurnTxHash.hash = txHash
+			lamdenBurnTxHash.success = true
+			continueBurn(unSignedABI)
+		}else {
+			isLoading = false;
+			status=""
+			message = "Unable to get Burn Result from transaction hash provided.";
+		}
+	}
+
+	const continueBurn = async (unSignedABI) => {
+		console.log({status, isLoading})
+		const signedABI = await getProof(unSignedABI)
+		if (!signedABI){
+			isLoading = false;
+			status = ""
+			return
+		}else{
+			status = `Got Burn Proof from the Lamden Blockchain.`
+			console.log({status, isLoading})
+		}
+
+		status = `Processing Burn Proof...`
+		console.log({status})
+
+		const proofData = processProof(unSignedABI, signedABI)
+		if (!proofData) {
+			message = "Malformed Proof"
+			isLoading = false;
+			status = ""
+			return
+		}
+		status = `Sending ${tokenName} tokens from Lamden to Ethereum (check for Metamask popup)...`
+		console.log({status})
+		const txHashResult = await sendProofToEthereum(proofData)
+		console.log({txHashResult})
+		finishBurn(txHashResult)
+	}
+
+	const finishBurn = (txHashResult) => {
+		status = ""
+		isLoading = false;
+		message=""
+		if (!txHashResult.status){
+			message=txHashResult.message || "Error sending Ethereum Transaction."
+			ethTxHash.success = false
+			return
+		}
+		ethTxHash.success = true
+		success = `${tokenName} tokens sent to Ethereum Chain`;
+	}
+
+	const toggleResume = () => newSwap = !newSwap
+
+	const handleAmountInput = (e) => {
 		e.target.setCustomValidity('')
 		e.target.value = e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
 	}
-	const handleInvalid = (e) => e.target.setCustomValidity('A number is required')
+	const handleAmountInvalid = (e) => e.target.setCustomValidity('A number is required')
+
+	const handleTxHashInput = (e) => e.target.setCustomValidity('')
+	const handleTxHashInvalid = (e) => e.target.setCustomValidity('Invalid Lamden Transaction Hash')
 </script>
 
-<div class="loading {isLoading ? 'is-loading' : ''}">
-	<h1>Loading</h1>
-	<p class="status">{status}</p>
-</div>
+{#if conf.lamden.clearingHouse.networkType === 'mainnet'}
+	<Alert message={"Swap Back to Ethereum is currently disabled. Sorry for the inconvenience."} type={"danger"} /> 
+{:else}
+	<div class="loading {isLoading ? 'is-loading' : ''}">
+		<h1>Processing</h1>
+		<p class="status">{status}</p>
+		{#if lamdenApprovalTxHash.hash}
+			<a href="{`${conf.lamden.network.blockexplorer}/transactions/${lamdenApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+				{`Lamden Approval: ${conf.lamden.network.blockexplorer}/transactions/${lamdenApprovalTxHash.hash.substring(0, 12)}...`}
+			</a>
+			<br>
+		{/if}
+		{#if lamdenBurnTxHash.hash}
+			<a href="{`${conf.lamden.network.blockexplorer}/transactions/${lamdenBurnTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+				{`Burn Tx: ${conf.lamden.network.blockexplorer}/transactions/${lamdenBurnTxHash.hash.substring(0, 12)}...`}
+			</a>
+			<br>
+		{/if}
+		{#if ethTxHash.hash}
+			<a href="{`${conf.ethereum.blockexplorer}/tx/${ethTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+				{`Etheruem Withdraw: ${conf.ethereum.blockexplorer}/tx/${ethTxHash.hash.substring(0, 12)}...`}
+			</a>
+		{/if}
+	</div>
+	<!--<button on:click={toggleResume}>{newSwap ? "Resume Swap" : "Create New Swap"}</button>-->
+	<div class="row" style="margin-top: 3rem">
+		<Alert {message} type={"danger"}> 
+			<div slot="tx_hash">
+				{#if lamdenApprovalTxHash.hash}
+					<a href="{`${conf.lamden.network.blockexplorer}/transactions/${lamdenApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Lamden Approval: ${conf.lamden.network.blockexplorer}/transactions/${lamdenApprovalTxHash.hash.substring(0, 12)}...`}
+					</a>
+					<br>
+				{/if}
+				{#if lamdenBurnTxHash.hash}
+					<a href="{`${conf.lamden.network.blockexplorer}/transactions/${lamdenBurnTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Burn Tx: ${conf.lamden.network.blockexplorer}/transactions/${lamdenBurnTxHash.hash.substring(0, 12)}...`}
+					</a>
+					<br>
+				{/if}
+				{#if ethTxHash.hash}
+					<a href="{`${conf.ethereum.blockexplorer}/tx/${ethTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Etheruem Withdraw: ${conf.ethereum.blockexplorer}/tx/${ethTxHash.hash.substring(0, 12)}...`}
+					</a>
+				{/if}
+			</div>
+		</Alert>
+		<Alert message={success} type={"success"} >
+			<div slot="tx_hash">
+				{#if lamdenApprovalTxHash.hash}
+					<a href="{`${conf.lamden.network.blockexplorer}/transactions/${lamdenApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Lamden Approval: ${conf.lamden.network.blockexplorer}/transactions/${lamdenApprovalTxHash.hash.substring(0, 12)}...`}
+					</a>
+					<br>
+				{/if}
+				{#if lamdenBurnTxHash.hash}
+					<a href="{`${conf.lamden.network.blockexplorer}/transactions/${lamdenBurnTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Lamden Burn Tx: ${conf.lamden.network.blockexplorer}/transactions/${lamdenBurnTxHash.hash.substring(0, 12)}...`}
+					</a>
+					<br>
+				{/if}
+				{#if ethTxHash.hash}
+					<a href="{`${conf.ethereum.blockexplorer}/tx/${ethTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Etheruem Withdraw: ${conf.ethereum.blockexplorer}/tx/${ethTxHash.hash.substring(0, 12)}...`}
+					</a>
+				{/if}
+			</div>
+		</Alert>
+		{#if newSwap}
+			<form
+				on:submit|preventDefault={startBurn}
+				action="#"
+				method="POST"
+				style="width: 100%">
+				<div class="form-group">
+					<label for="tokenName">Token Name</label>
+					<select
+						class="form-control"
+						on:change={checkTokenBalance}
+						name="tokenName"
+						id="tokenName"
+						>
+						<option value="">Select Token</option>
+						{#each conf.ethereum.tokens as token}
+							<option value={token.name}>{token.name}</option>
+						{/each}
+					</select>
+					{#if tokenName}
+						<p>{`Your Lamden ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
+					{/if}
+				</div>
 
-<div class="row" style="margin-top: 3rem">
-	<Alert {message} type={"danger"} />
-	<Alert message={success} type={"success"} />
-	<form
-		on:submit|preventDefault={startBurn}
-		action="#"
-		method="POST"
-		style="width: 100%">
-		<div class="form-group">
-			<label for="tokenName">Token Name</label>
-			<select
-				class="form-control"
-				on:change={checkTokenBalance}
-				name="tokenName"
-				id="tokenName"
-				>
-				<option value="">Select Token</option>
-				{#each conf.ethereum.tokens as token}
-					<option value={token.name}>{token.name}</option>
-				{/each}
-			</select>
-			{#if tokenName}
-				<p>{`Your Lamden ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
-			{/if}
-		</div>
+				<div class="form-group">
+					<label for="quantity">Amount</label>
+					<input 
+						class="form-control"
+						type="text"
+						placeholder=""
+						name="quantity"
+						id="quantity"
+						required 
+						pattern="^\d*\.?\d*$"
+						on:invalid={handleAmountInvalid}
+						on:input={handleAmountInput}>
+				</div>
 
-		<div class="form-group">
-			<label for="quantity">Amount</label>
-			<input 
-				class="form-control"
-				type="text"
-				placeholder=""
-				name="quantity"
-				id="quantity"
-				required 
-				pattern="^\d*\.?\d*$"
-				on:invalid={handleInvalid}
-				on:input={handleInput}>
-		</div>
+				<br />
 
-		<br />
+				<button 
+					type="submit" 
+					disabled={buttonDisabled} 
+					class="btn btn-outline-primary btn-block">
+					Send Tokens To Ethereum
+				</button>
+			</form>
+		{:else}
+			<form
+				on:submit|preventDefault={resumeBurn}
+				action="#"
+				method="POST"
+				style="width: 100%">
+				<div class="form-group">
+					<label for="txHash">Lamden BURN Transaction Hash</label>
+					<input 
+						class="form-control"
+						type="text"
+						placeholder=""
+						name="txHash"
+						id="txHash"
+						required 
+						pattern="^[a-fA-F0-9]+$"
+						minlength="64"
+						on:invalid={handleTxHashInvalid}
+						on:input={handleTxHashInput}>
+				</div>
 
-		<button 
-			type="submit" 
-			disabled={buttonDisabled} 
-			class="btn btn-outline-primary btn-block">
-			Send Tokens To Ethereum
-		</button>
-	</form>
-</div>
+				<br />
+
+				<button 
+					type="submit" 
+					class="btn btn-outline-primary btn-block">
+					Send Tokens To Ethereum
+				</button>
+			</form>
+		{/if}
+	</div>
+{/if}
 
 <style>
 	.loading {
@@ -319,7 +583,7 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(249, 249, 249, 0.7);
+		background-color: rgba(249, 249, 249, 0.9);
 	}
 	.is-loading {
 		display: block;
