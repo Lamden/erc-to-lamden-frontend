@@ -185,7 +185,7 @@
 			else return res.json()
 		})
 		.then((json) => {
-			console.log({json})
+			//console.log({json})
 			if (!json) resolve(false)
 			else{
 				if (!json.result || json.result === null || json.result === "None") resolve(false)
@@ -209,11 +209,11 @@
 		}
 
 		const checkForProof = async () => {
-			console.log({timesChecked})
+			//console.log({timesChecked})
 			fetch(`${conf.lamden.network.apiLink}/states/${conf.lamden.clearingHouse.contractName}/proofs/${unSignedABI.replace(/'/g, "")}`)
 			.then(res => res.json())
 			.then((json) => {
-				console.log({json})
+				//console.log({json})
 				if (!json) {
 					checkAgain()
 					return
@@ -334,14 +334,14 @@
 		}else{
 			status = `Attempting to Burn ${token.name} tokens on the Lamden Blockchain (check for Lamden Wallet popup)...`
 			const unSignedABI = await sendBurn(token, amount)
-			console.log({status, isLoading})
+			//console.log({status, isLoading})
 
 			if (!unSignedABI){
 				isLoading = false;
 				status = ""
 				message = `Unable to Burn ${WETH} tokens on the Lamden Blockchain.`;
 			}else{
-				console.log({status, isLoading})
+				//console.log({status, isLoading})
 				continueBurn(unSignedABI)
 			}
 		}
@@ -360,8 +360,8 @@
 		status = `Checking Lamden Blockchain for Proof of token Burn...`
 
 		const unSignedABI = await getUnsignedABIFromBlockchain(txHash)
-		console.log({unSignedABI})
-		console.log({status})
+		//console.log({unSignedABI})
+		//console.log({status})
 		if (unSignedABI) {
 			lamdenBurnTxHash.hash = txHash
 			lamdenBurnTxHash.success = true
@@ -374,7 +374,7 @@
 	}
 
 	const continueBurn = async (unSignedABI) => {
-		console.log({status, isLoading})
+		//console.log({status, isLoading})
 		const signedABI = await getProof(unSignedABI)
 		if (!signedABI){
 			isLoading = false;
@@ -382,11 +382,11 @@
 			return
 		}else{
 			status = `Got Burn Proof from the Lamden Blockchain.`
-			console.log({status, isLoading})
+			//console.log({status, isLoading})
 		}
 
 		status = `Processing Burn Proof...`
-		console.log({status})
+		//console.log({status})
 
 		const proofData = processProof(unSignedABI, signedABI)
 		if (!proofData) {
@@ -396,9 +396,9 @@
 			return
 		}
 		status = `Sending ${tokenName} tokens from Lamden to Ethereum (check for Metamask popup)...`
-		console.log({status})
+		//console.log({status})
 		const txHashResult = await sendProofToEthereum(proofData)
-		console.log({txHashResult})
+		//console.log({txHashResult})
 		finishBurn(txHashResult)
 	}
 

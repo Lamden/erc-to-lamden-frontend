@@ -26,10 +26,10 @@ export const setCurrentNetwork = (network) => {
 }
 
 export const checkEthTxStatus = async (txHash, web3) => {
-    console.log({checking: txHash})
+    //console.log({checking: txHash})
     try{
         let response =  await web3.eth.getTransactionReceipt(txHash)
-        console.log(response)
+        //console.log(response)
         return response
     } catch (e) {}
     return false
@@ -54,6 +54,6 @@ export const checkERC20ApprovalAmount = async (approvalFrom, approvalTo, ERC20_C
 
 export const needsERC20Approval = async (approvalFrom, approvalTo, ERC20_Contract, quantity_wei) => {
     let allowance = await checkERC20ApprovalAmount(approvalFrom, approvalTo, ERC20_Contract)
-    console.log({approvalFrom, approvalTo, quantity_wei, allowance})
+    //console.log({approvalFrom, approvalTo, quantity_wei, allowance})
     return allowance !== quantity_wei
 }

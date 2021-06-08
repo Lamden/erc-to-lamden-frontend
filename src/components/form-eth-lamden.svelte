@@ -166,7 +166,7 @@
 		).toString();
 
 		const erc20TokenContract = new $web3.eth.Contract(token.abi, token.address);
-		console.log({abi: conf.ethereum.clearingHouse.abi, clearinghouseAddress: conf.ethereum.clearingHouse.address})
+		//console.log({abi: conf.ethereum.clearingHouse.abi, clearinghouseAddress: conf.ethereum.clearingHouse.address})
 		const clearingHouseContract = new $web3.eth.Contract(
 			conf.ethereum.clearingHouse.abi,
 			conf.ethereum.clearingHouse.address
@@ -233,7 +233,7 @@
 
 		status = `Sending Ethereum ${tokenName} deposit transaction (check for metamask popup)...`
 		let depositTxHashResult = await new Promise(resolver => {
-			console.log({tokenAddress: token.address, quantity: quantity.toString(), recipient})
+			//console.log({tokenAddress: token.address, quantity: quantity.toString(), recipient})
 			const deposit = clearingHouseContract.methods
 				.deposit(token.address, quantity.toString(), recipient)
 			try{
