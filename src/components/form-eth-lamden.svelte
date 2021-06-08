@@ -198,7 +198,8 @@
 			$selectedAccount, 
 			conf.ethereum.clearingHouse.address, 
 			erc20TokenContract,
-			$web3.utils.toWei(quantity, "ether"))
+			quantity
+		)
 
 		if (needsApproval){
 			status = "Sending Ethereum token approval transaction (check for metamask popup)..."
