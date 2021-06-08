@@ -40,3 +40,20 @@ export const checkEthTransactionUntilResult = async (txHash, web3, resolver) => 
     if (!txHashInfo || !txHashInfo.status) setTimeout(() => checkEthTransactionUntilResult(txHash, web3, resolver), 5000)
     else resolver(txHashInfo)
 }
+
+export const checkERC20ApprovalAmount = async (approvalFrom, approvalTo, ERC20_Contract) => {
+    return new Promise(resolver => {
+        try{
+            ERC20_Contract.methods.allowance(approvalFrom, approvalTo).call()
+            .then(allowance => resolver(allowance))
+        }catch (err) {
+            resolver("0")
+        }
+    })
+}
+
+export const needsERC20Approval = async (approvalFrom, approvalTo, ERC20_Contract, quantity_wei) => {
+    let allowance = await checkERC20ApprovalAmount(approvalFrom, approvalTo, ERC20_Contract)
+    console.log({approvalFrom, approvalTo, quantity_wei, allowance})
+    return allowance !== quantity_wei
+}

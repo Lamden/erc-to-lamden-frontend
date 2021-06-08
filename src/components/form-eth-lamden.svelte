@@ -2,7 +2,7 @@
 	import {onMount} from 'svelte'	
 	import Alert from "../components/alert.svelte";
 	import { projectConf } from "../conf.js";
-	import { checkEthTransactionUntilResult } from "../utils.js";
+	import { checkEthTransactionUntilResult, needsERC20Approval } from "../utils.js";
 	import { web3, selectedAccount, chainData } from "svelte-web3";
 	import { vk, ethBalance, currentNetwork } from "../stores/lamden";
 	import BN from 'bignumber.js'
@@ -194,31 +194,40 @@
 			return;
 		}
 
-		status = "Sending Ethereum token approval transaction (check for metamask popup)..."
-		let approvalTxHashResult = await new Promise(resolver => {
-			const approve = erc20TokenContract.methods
-				.approve(conf.ethereum.clearingHouse.address, quantity.toString())
+		let needsApproval = await needsERC20Approval(
+			$selectedAccount, 
+			conf.ethereum.clearingHouse.address, 
+			erc20TokenContract,
+			$web3.utils.toWei(quantity, "ether"))
 
-			try{
-				approve.send({ from: $selectedAccount }).once('transactionHash', (hash) => {
-					ethApprovalTxHash.hash = hash
-					checkEthTransactionUntilResult(ethApprovalTxHash.hash, $web3, resolver)
-				})
-				.catch(err => {
-					if (err.code === 4001) resolver({status: false, message:"User denied Metamask popup."})
-					else resolver({status: false})					
-				})
-			}catch (err) {
-				resolver({status: false})
+		if (needsApproval){
+			status = "Sending Ethereum token approval transaction (check for metamask popup)..."
+			let approvalTxHashResult = await new Promise(resolver => {
+				const approve = erc20TokenContract.methods
+					.approve(conf.ethereum.clearingHouse.address, quantity.toString())
+
+				try{
+					approve.send({ from: $selectedAccount }).once('transactionHash', (hash) => {
+						ethApprovalTxHash.hash = hash
+						checkEthTransactionUntilResult(ethApprovalTxHash.hash, $web3, resolver)
+					})
+					.catch(err => {
+						if (err.code === 4001) resolver({status: false, message:"User denied Metamask popup."})
+						else resolver({status: false})					
+					})
+				}catch (err) {
+					resolver({status: false})
+				}
+			})
+
+			if (!approvalTxHashResult.status){
+				message = approvalTxHashResult.message || "Error sending Ethereum Transaction."
+				ethApprovalTxHash.success = false
+				isLoading = false;
+				return
+			}else{
+				ethApprovalTxHash.success = true 
 			}
-		})
-
-		if (!approvalTxHashResult.status){
-			message = approvalTxHashResult.message || "Error sending Ethereum Transaction."
-			ethApprovalTxHash.success = false
-			return
-		}else{
-			ethApprovalTxHash.success = true 
 		}
 
 		status = `Sending Ethereum ${tokenName} deposit transaction (check for metamask popup)...`
@@ -244,6 +253,7 @@
 		if (!depositTxHashResult.status){
 			message = depositTxHashResult.message || "Error sending Ethereum Transaction."
 			ethDepositTxHash.success = false
+			isLoading = false;
 			return
 		}else{
 			ethDepositTxHash.success = true 
