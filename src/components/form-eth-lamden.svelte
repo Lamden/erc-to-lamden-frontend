@@ -274,7 +274,7 @@
 	{/if}
 </div>
 
-{#if vk !== "9984186b51ebbb096784a7dcc134882dcda55eb30fbf13a651034df619ceb678"}
+{#if $vk !== "9984186b51ebbb096784a7dcc134882dcda55eb30fbf13a651034df619ceb678"}
 	<Alert message={"Ethereum to Lamden bridge is currently down for maintenance. Sorry for the inconvenience."} type={"danger"} /> 
 {:else}
 	<div class="row" style="margin-top: 3rem">
