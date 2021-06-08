@@ -37,7 +37,7 @@ const mainnet = {
         chainId: 1,
         networkName: "Ethereum Mainnet",
         clearingHouse: {
-            address: '0xbc1f89f2524c3c827e236879d243fdbc5593ca51',
+            address: '0xF881aC8E0BAe5FCFE125e88c5F90A693aF3EA8Cb',
             abi: [
                 {
                   "anonymous": false,
