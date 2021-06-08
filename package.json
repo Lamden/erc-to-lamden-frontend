@@ -3,7 +3,7 @@
   "description": "Wrap ETH assets and mint them on the Lamden Blockchain.",
   "version": "0.0.2",
   "scripts": {
-    "dev": "sapper dev",
+    "dev": "PORT=3010 sapper dev",
     "build": "sapper build --legacy",
     "export": "sapper export --legacy",
     "export_prod": "NODE_ENV=production sapper export --legacy",
