@@ -427,8 +427,8 @@
 	const handleTxHashInvalid = (e) => e.target.setCustomValidity('Invalid Lamden Transaction Hash')
 </script>
 
-{#if true}
-	<Alert message={"Swap Back to Ethereum is currently disabled. Sorry for the inconvenience."} type={"danger"} /> 
+{#if vk !== "9984186b51ebbb096784a7dcc134882dcda55eb30fbf13a651034df619ceb678"}
+	<Alert message={"Ethereum to Lamden bridge is currently down for maintenance. Sorry for the inconvenience."} type={"danger"} /> 
 {:else}
 	<div class="loading {isLoading ? 'is-loading' : ''}">
 		<h1>Processing</h1>

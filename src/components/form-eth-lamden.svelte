@@ -274,80 +274,83 @@
 	{/if}
 </div>
 
-<div class="row" style="margin-top: 3rem">
-	<Alert {message} type={"danger"} >
-		<div slot="tx_hash">
-			{#if ethApprovalTxHash.hash}
-				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
-					{`Etheruem Approval: ${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash.substring(0, 12)}...`}
-				</a>
-				<br>
-			{/if}
-			{#if ethDepositTxHash.hash}
-				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
-					{`Etheruem Deposit: ${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash.substring(0, 12)}...`}
-				</a>
-			{/if}
-		</div>
-	</Alert>
-	<Alert message={success} type={"success"}>
-		<div slot="tx_hash">
-			{#if ethApprovalTxHash.hash}
-				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
-					{`Etheruem Approval: ${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash.substring(0, 12)}...`}
-				</a>
-				<br>
-			{/if}
-			{#if ethDepositTxHash.hash}
-				<a href="{`${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
-					{`Etheruem Deposit: ${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash.substring(0, 12)}...`}
-				</a>
-			{/if}
-		</div>
-	</Alert>
-	<form
-		on:submit|preventDefault={startSwap}
-		action="#"
-		method="POST"
-		style="width: 100%"
-	>
-		<div class="form-group">
-		<label for="tokenName">Token Name</label>
-		<select
-			class="form-control"
-			on:change={checkTokenBalance}
-			name="tokenName"
-			id="tokenName"
+{#if vk !== "9984186b51ebbb096784a7dcc134882dcda55eb30fbf13a651034df619ceb678"}
+	<Alert message={"Ethereum to Lamden bridge is currently down for maintenance. Sorry for the inconvenience."} type={"danger"} /> 
+{:else}
+	<div class="row" style="margin-top: 3rem">
+		<Alert {message} type={"danger"} >
+			<div slot="tx_hash">
+				{#if ethApprovalTxHash.hash}
+					<a href="{`${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Etheruem Approval: ${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash.substring(0, 12)}...`}
+					</a>
+					<br>
+				{/if}
+				{#if ethDepositTxHash.hash}
+					<a href="{`${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Etheruem Deposit: ${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash.substring(0, 12)}...`}
+					</a>
+				{/if}
+			</div>
+		</Alert>
+		<Alert message={success} type={"success"}>
+			<div slot="tx_hash">
+				{#if ethApprovalTxHash.hash}
+					<a href="{`${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Etheruem Approval: ${conf.ethereum.blockexplorer}/tx/${ethApprovalTxHash.hash.substring(0, 12)}...`}
+					</a>
+					<br>
+				{/if}
+				{#if ethDepositTxHash.hash}
+					<a href="{`${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash}`}" target="_blank" rel="noreferrer noopener">
+						{`Etheruem Deposit: ${conf.ethereum.blockexplorer}/tx/${ethDepositTxHash.hash.substring(0, 12)}...`}
+					</a>
+				{/if}
+			</div>
+		</Alert>
+		<form
+			on:submit|preventDefault={startSwap}
+			action="#"
+			method="POST"
+			style="width: 100%"
 		>
-			<option value="">Select Token</option>
-			{#each conf.ethereum.tokens as token}
-				<option value={token.name}>{token.name}</option>
-			{/each}
-		</select>
-		{#if tokenName}
-			<p> {`Your Ethereum ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
-		{/if}
-		</div>
-		<div class="form-group">
-		<label for="quantity">Amount</label>
-		<input 
-			class="form-control"
-			type="text"
-			placeholder=""
-			name="quantity"
-			id="quantity"
-			required 
-			pattern="^\d*\.?\d*$"
-			on:invalid={handleInvalid}
-			on:input={handleInput}>
-		</div>
-		<br />
-		<button type="submit" disabled={buttonDisabled} class="btn btn-outline-primary btn-block">
-			Send Tokens To Lamden
-		</button>
-	</form>
-</div>
-
+			<div class="form-group">
+			<label for="tokenName">Token Name</label>
+			<select
+				class="form-control"
+				on:change={checkTokenBalance}
+				name="tokenName"
+				id="tokenName"
+			>
+				<option value="">Select Token</option>
+				{#each conf.ethereum.tokens as token}
+					<option value={token.name}>{token.name}</option>
+				{/each}
+			</select>
+			{#if tokenName}
+				<p> {`Your Ethereum ${tokenName} balance is: ${balance.toFixed(18)} ${tokenName}`}</p>
+			{/if}
+			</div>
+			<div class="form-group">
+			<label for="quantity">Amount</label>
+			<input 
+				class="form-control"
+				type="text"
+				placeholder=""
+				name="quantity"
+				id="quantity"
+				required 
+				pattern="^\d*\.?\d*$"
+				on:invalid={handleInvalid}
+				on:input={handleInput}>
+			</div>
+			<br />
+			<button type="submit" disabled={buttonDisabled} class="btn btn-outline-primary btn-block">
+				Send Tokens To Lamden
+			</button>
+		</form>
+	</div>
+{/if}
 <style>
 	.loading {
 		display: none;
