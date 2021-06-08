@@ -451,7 +451,7 @@
 			</a>
 		{/if}
 	</div>
-	<!--<button on:click={toggleResume}>{newSwap ? "Resume Swap" : "Create New Swap"}</button>-->
+	<button on:click={toggleResume}>{newSwap ? "Resume Swap" : "Create New Swap"}</button>
 	<div class="row" style="margin-top: 3rem">
 		<Alert {message} type={"danger"}> 
 			<div slot="tx_hash">

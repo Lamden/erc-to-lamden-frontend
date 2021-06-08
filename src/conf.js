@@ -641,7 +641,7 @@ const testnet = {
         chainId: 42,
         networkName: "Kovan Test Network",
         clearingHouse: {
-            address: '0xbcE6f0cBaB30ef4841Aa14f606040fF52AE8d712',
+            address: '0xF69Fae70CC5Af8f3A8DE496Bf06C6bC021baDea0',
             abi: [
                 {
                     "inputs": [
