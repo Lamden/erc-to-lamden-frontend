@@ -198,7 +198,8 @@
 			$selectedAccount, 
 			conf.ethereum.clearingHouse.address, 
 			erc20TokenContract,
-			quantity
+			quantity,
+			$web3
 		)
 
 		if (needsApproval){

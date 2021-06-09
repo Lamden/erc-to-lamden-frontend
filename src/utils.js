@@ -52,8 +52,11 @@ export const checkERC20ApprovalAmount = async (approvalFrom, approvalTo, ERC20_C
     })
 }
 
-export const needsERC20Approval = async (approvalFrom, approvalTo, ERC20_Contract, quantity_wei) => {
+export const needsERC20Approval = async (approvalFrom, approvalTo, ERC20_Contract, quantity_wei, web3) => {
+    var BN = web3.utils.BN
     let allowance = await checkERC20ApprovalAmount(approvalFrom, approvalTo, ERC20_Contract)
+    let allowanceBN = new BN(allowance)
+    let quantity_wei_BN = new BN(quantity_wei)
     //console.log({approvalFrom, approvalTo, quantity_wei, allowance})
-    return allowance !== quantity_wei
+    return allowanceBN.gte(quantity_wei_BN)
 }
