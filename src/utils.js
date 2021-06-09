@@ -58,5 +58,5 @@ export const needsERC20Approval = async (approvalFrom, approvalTo, ERC20_Contrac
     let allowanceBN = new BN(allowance)
     let quantity_wei_BN = new BN(quantity_wei)
     //console.log({approvalFrom, approvalTo, quantity_wei, allowance})
-    return allowanceBN.gte(quantity_wei_BN)
+    return allowanceBN.lt(quantity_wei_BN)
 }
