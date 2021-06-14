@@ -188,6 +188,7 @@
 			//console.log({json})
 			if (!json) resolve(false)
 			else{
+				console.log(json)
 				if (!json.result || json.result === null || json.result === "None") resolve(false)
 				else resolve(json.result)	
 			}
@@ -201,6 +202,7 @@
 
 		const checkAgain = () => {
 			timesChecked = timesChecked + 1
+			console.log({timesChecked})
 			if (timesChecked <= timesToCheck) setTimeout(checkForProof, 1000)
 			else{
 				message =   `Timed out attempting to get Proof of Burn from the Lamden Blockchain. Checked ${timesToCheck} times.`;
@@ -211,8 +213,13 @@
 		const checkForProof = async () => {
 			//console.log({timesChecked})
 			fetch(`${conf.lamden.network.apiLink}/states/${conf.lamden.clearingHouse.contractName}/proofs/${unSignedABI.replace(/'/g, "")}`)
+			.then(res => {
+				console.log(res)
+				return res
+			})
 			.then(res => res.json())
 			.then((json) => {
+				console.log(json)
 				//console.log({json})
 				if (!json) {
 					checkAgain()
