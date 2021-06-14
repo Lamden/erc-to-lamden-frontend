@@ -53,7 +53,6 @@
 						method: "GET",
 					}
 				);
-				console.log(res)
 				if (res.status === 200) {
 					const value = (await res.json()).value;
 					if (value) {
@@ -188,7 +187,6 @@
 			//console.log({json})
 			if (!json) resolve(false)
 			else{
-				console.log(json)
 				if (!json.result || json.result === null || json.result === "None") resolve(false)
 				else resolve(json.result)	
 			}
@@ -213,14 +211,8 @@
 		const checkForProof = async () => {
 			//console.log({timesChecked})
 			fetch(`${conf.lamden.network.apiLink}/states/${conf.lamden.clearingHouse.contractName}/proofs/${unSignedABI.replace(/'/g, "")}`)
-			.then(res => {
-				console.log(res)
-				return res
-			})
 			.then(res => res.json())
 			.then((json) => {
-				console.log(json)
-				//console.log({json})
 				if (!json) {
 					checkAgain()
 					return
